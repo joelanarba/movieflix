@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { MovieDetails as MovieDetailsType } from '../../../types/movie';
 import { fetchMovieDetails } from '../../../utils/api';
 import MovieDetails from '../../../components/Movies/MovieDetails';
-import LoadingSpinner from '../../../components/UI/LoadingSpinner';
-import ErrorMessage from '../../../components/UI/ErrorMessage';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 const PageContainer = styled.div`
   min-height: calc(100vh - 80px);
