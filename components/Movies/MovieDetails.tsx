@@ -14,6 +14,7 @@ import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { MovieDetails as MovieDetailsType } from '../../types/movie';
 import { getImageUrl } from '../../utils/api';
 import { useFavorites } from '../../contexts/FavoritesContext';
+import RecommendedMovies from './RecommendedMovies';
 
 const DetailsContainer = styled.div`
   max-width: 1200px;
@@ -353,6 +354,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           </CastGrid>
         </CastSection>
       )}
+
+      <RecommendedMovies movieId={movie.id} />
     </DetailsContainer>
   );
 };

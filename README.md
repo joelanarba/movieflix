@@ -109,8 +109,9 @@ This application uses The Movie Database (TMDb) API to fetch movie data. The API
 
 - `/trending/movie/{time_window}` - Get trending movies
 - `/movie/popular` - Get popular movies
-- `/movie/{movie_id}` - Get detailed movie information
+- `/movie/{movie_id}` - Get detailed movie information with credits
 - `/movie/{movie_id}/recommendations` - Get movie recommendations
+- `/search/movie` - Search for movies by query
 
 ## Features in Detail
 
@@ -120,10 +121,14 @@ This application uses The Movie Database (TMDb) API to fetch movie data. The API
 - Responsive grid layout adapting to different screen sizes
 
 ### Movie Detail Page
-- Dynamic routing with movie ID parameter
+- Dynamic routing with movie ID parameter (`/movies/[id]`)
 - Comprehensive movie information including runtime, genres, and cast
 - Add/remove favorites functionality
+- Top 5 cast members with photos and character names
+- Recommended movies section showing 6 related films
+- Add/remove favorites functionality with real-time UI updates
 - Back navigation button
+- Loading states and error handling for all data fetching
 
 ### Favorites Page
 - Persistent favorites using localStorage
