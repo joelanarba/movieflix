@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilm, faHeart, faHome } from '@fortawesome/free-solid-svg-icons';
@@ -90,16 +90,10 @@ const FavoritesCounter = styled.span`
 `;
 
 const Header: React.FC = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const { favorites } = useFavorites();
 
-  // Simple way to detect active route - in a real app, you might use usePathname
-  const isActive = (path: string) => {
-    if (typeof window !== 'undefined') {
-      return window.location.pathname === path;
-    }
-    return false;
-  };
+  const isActive = (path: string) => pathname === path;
 
   return (
     <HeaderContainer>
