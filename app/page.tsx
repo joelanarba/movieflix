@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { Movie } from '../types/movie';
 import { fetchTrendingMovies, fetchPopularMovies } from '../utils/api';
 import MovieGrid from '../components/Movies/MovieGrid';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
-import ErrorMessage from '../components/UI/ErrorMessage';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorMessage from '../components/ui/ErrorMessage';
 
 const HomeContainer = styled.div`
   min-height: calc(100vh - 80px);
