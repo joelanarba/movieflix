@@ -4,6 +4,7 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import Layout from '../components/Layout/Layout';
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] });
 
