@@ -14,7 +14,7 @@ const LayoutContainer = styled.div`
 `;
 
 const MainContent = styled.main`
-  padding-top: 80px;
+  padding-top: 128px;
   flex: 1;
 `;
 

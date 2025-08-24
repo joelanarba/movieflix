@@ -100,6 +100,48 @@ export const fetchPopularMovies = async (page: number = 1): Promise<Movie[]> => 
   }
 };
 
+export const fetchTopRatedMovies = async (page: number = 1): Promise<Movie[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<TMDbResponse<Movie>>('/movie/top_rated', {
+      params: {
+        page,
+      },
+    });
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching top rated movies:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch top rated movies');
+  }
+};
+
+export const fetchUpcomingMovies = async (page: number = 1): Promise<Movie[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<TMDbResponse<Movie>>('/movie/upcoming', {
+      params: {
+        page,
+      },
+    });
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching upcoming movies:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch upcoming movies');
+  }
+};
+
 export const fetchRecommendations = async (movieId: string): Promise<Movie[]> => {
   try {
     if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {

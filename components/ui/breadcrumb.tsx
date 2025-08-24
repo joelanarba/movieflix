@@ -1,115 +1,138 @@
-import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import { ChevronRight, MoreHorizontal } from 'lucide-react';
+'use client';
 
-import { cn } from '@/lib/utils';
+import React from 'react';
+import Link from 'next/link';
+import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-const Breadcrumb = React.forwardRef<
-  HTMLElement,
-  React.ComponentPropsWithoutRef<'nav'> & {
-    separator?: React.ReactNode;
+const BreadcrumbContainer = styled.nav`
+  background-color: rgba(26, 29, 41, 0.8);
+  border-bottom: 1px solid #2d3748;
+  padding: 12px 0;
+  backdrop-filter: blur(4px);
+`;
+
+const BreadcrumbContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+const BreadcrumbList = styled.ol`
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const BreadcrumbItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const BreadcrumbLink = styled(Link)`
+  color: #cbd5e0;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    color: #4299e1;
+    background-color: rgba(66, 153, 225, 0.1);
   }
->(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />);
-Breadcrumb.displayName = 'Breadcrumb';
 
-const BreadcrumbList = React.forwardRef<
-  HTMLOListElement,
-  React.ComponentPropsWithoutRef<'ol'>
->(({ className, ...props }, ref) => (
-  <ol
-    ref={ref}
-    className={cn(
-      'flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5',
-      className
-    )}
-    {...props}
-  />
-));
-BreadcrumbList.displayName = 'BreadcrumbList';
-
-const BreadcrumbItem = React.forwardRef<
-  HTMLLIElement,
-  React.ComponentPropsWithoutRef<'li'>
->(({ className, ...props }, ref) => (
-  <li
-    ref={ref}
-    className={cn('inline-flex items-center gap-1.5', className)}
-    {...props}
-  />
-));
-BreadcrumbItem.displayName = 'BreadcrumbItem';
-
-const BreadcrumbLink = React.forwardRef<
-  HTMLAnchorElement,
-  React.ComponentPropsWithoutRef<'a'> & {
-    asChild?: boolean;
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 2px 4px;
   }
->(({ asChild, className, ...props }, ref) => {
-  const Comp = asChild ? Slot : 'a';
+`;
+
+const BreadcrumbSeparator = styled.span`
+  color: #4a5568;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 480px) {
+    font-size: 10px;
+  }
+`;
+
+const BreadcrumbCurrent = styled.span`
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 768px) {
+    max-width: 150px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    max-width: 120px;
+  }
+`;
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface BreadcrumbProps {
+  items: BreadcrumbItem[];
+}
+
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+  if (!items || items.length === 0) {
+    return null;
+  }
 
   return (
-    <Comp
-      ref={ref}
-      className={cn('transition-colors hover:text-foreground', className)}
-      {...props}
-    />
+    <BreadcrumbContainer>
+      <BreadcrumbContent>
+        <BreadcrumbList>
+          {items.map((item, index) => {
+            const isLast = index === items.length - 1;
+            
+            return (
+              <BreadcrumbItem key={index}>
+                {isLast ? (
+                  <BreadcrumbCurrent title={item.label}>
+                    {item.label}
+                  </BreadcrumbCurrent>
+                ) : (
+                  <>
+                    <BreadcrumbLink href={item.href || '#'}>
+                      {item.label}
+                    </BreadcrumbLink>
+                    <BreadcrumbSeparator>
+                      <FontAwesomeIcon icon={faChevronRight} />
+                    </BreadcrumbSeparator>
+                  </>
+                )}
+              </BreadcrumbItem>
+            );
+          })}
+        </BreadcrumbList>
+      </BreadcrumbContent>
+    </BreadcrumbContainer>
   );
-});
-BreadcrumbLink.displayName = 'BreadcrumbLink';
-
-const BreadcrumbPage = React.forwardRef<
-  HTMLSpanElement,
-  React.ComponentPropsWithoutRef<'span'>
->(({ className, ...props }, ref) => (
-  <span
-    ref={ref}
-    role="link"
-    aria-disabled="true"
-    aria-current="page"
-    className={cn('font-normal text-foreground', className)}
-    {...props}
-  />
-));
-BreadcrumbPage.displayName = 'BreadcrumbPage';
-
-const BreadcrumbSeparator = ({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<'li'>) => (
-  <li
-    role="presentation"
-    aria-hidden="true"
-    className={cn('[&>svg]:size-3.5', className)}
-    {...props}
-  >
-    {children ?? <ChevronRight />}
-  </li>
-);
-BreadcrumbSeparator.displayName = 'BreadcrumbSeparator';
-
-const BreadcrumbEllipsis = ({
-  className,
-  ...props
-}: React.ComponentProps<'span'>) => (
-  <span
-    role="presentation"
-    aria-hidden="true"
-    className={cn('flex h-9 w-9 items-center justify-center', className)}
-    {...props}
-  >
-    <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">More</span>
-  </span>
-);
-BreadcrumbEllipsis.displayName = 'BreadcrumbElipssis';
-
-export {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbEllipsis,
 };
+
+export default Breadcrumb;

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
+import Navbar from './Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilm, faHeart, faHome } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -116,6 +117,8 @@ const Header: React.FC = () => {
           </NavLink>
         </NavLinks>
       </Nav>
+      {/* Add the navbar here */}
+      <Navbar />
     </HeaderContainer>
   );
 };

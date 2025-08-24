@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faHeart as faHeartSolid, faCalendar } from '@fortawesome/free-solid-svg-icons';
@@ -129,11 +130,22 @@ const StyledLink = styled(Link)`
   display: block;
 `;
 
+// Helper function to determine the source page based on pathname
+const getSourceFromPathname = (pathname: string): string => {
+  if (pathname === '/') return 'trending';
+  if (pathname === '/popular') return 'popular';
+  if (pathname === '/top-rated') return 'top-rated';
+  if (pathname === '/upcoming') return 'upcoming';
+  if (pathname === '/favorites') return 'favorites';
+  return 'home';
+};
+
 interface MovieCardProps {
   movie: Movie;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+  const pathname = usePathname();
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   const isMovieFavorite = isFavorite(movie.id);
 
@@ -154,9 +166,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     return date.getFullYear().toString();
   };
 
+  // Generate the movie detail URL with source page information
+  const movieDetailUrl = `/movies/${movie.id}?from=${getSourceFromPathname(pathname)}`;
+
   return (
     <Card>
-      <StyledLink href={`/movies/${movie.id}`}>
+      <StyledLink href={movieDetailUrl}>
         <PosterContainer>
           {movie.poster_path ? (
             <PosterImage

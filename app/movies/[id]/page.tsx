@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import { MovieDetails as MovieDetailsType } from '../../../types/movie';
 import { fetchMovieDetails } from '../../../utils/api';
 import MovieDetails from '../../../components/Movies/MovieDetails';
+import Breadcrumb from '../../../components/ui/Breadcrumb';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 const PageContainer = styled.div`
   min-height: calc(100vh - 80px);
-  padding: 20px 0;
 `;
 
 const BackButton = styled.button`
@@ -27,7 +27,7 @@ const BackButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 0 20px 20px;
+  margin: 20px;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
@@ -37,11 +37,40 @@ const BackButton = styled.button`
     background-color: #4a5568;
     color: #ffffff;
   }
+
+  @media (max-width: 768px) {
+    margin: 20px 16px;
+  }
 `;
+
+const ContentContainer = styled.div`
+  padding-top: 0;
+`;
+
+// Helper function to determine source page info
+const getSourcePageInfo = (searchParams: URLSearchParams) => {
+  const from = searchParams.get('from');
+  
+  switch (from) {
+    case 'popular':
+      return { label: 'Popular', href: '/popular' };
+    case 'top-rated':
+      return { label: 'Top Rated', href: '/top-rated' };
+    case 'upcoming':
+      return { label: 'Upcoming', href: '/upcoming' };
+    case 'trending':
+      return { label: 'Trending', href: '/' };
+    case 'favorites':
+      return { label: 'Favorites', href: '/favorites' };
+    default:
+      return { label: 'Home', href: '/' };
+  }
+};
 
 const MovieDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [movie, setMovie] = useState<MovieDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +101,26 @@ const MovieDetailPage: React.FC = () => {
     loadMovieDetails();
   }, [movieId]);
 
+  // Generate breadcrumb items based on the source page and movie title
+  const getBreadcrumbItems = () => {
+    const sourcePageInfo = getSourcePageInfo(searchParams);
+    const items = [
+      { label: 'Home', href: '/' }
+    ];
+
+    // Only add intermediate page if it's not the home page
+    if (sourcePageInfo.href !== '/') {
+      items.push(sourcePageInfo);
+    }
+
+    // Add current movie title
+    if (movie) {
+      items.push({ label: movie.title });
+    }
+
+    return items;
+  };
+
   if (loading) {
     return (
       <PageContainer>
@@ -83,6 +132,7 @@ const MovieDetailPage: React.FC = () => {
   if (error) {
     return (
       <PageContainer>
+        <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Error' }]} />
         <BackButton onClick={() => router.back()}>
           ← Back
         </BackButton>
@@ -94,6 +144,7 @@ const MovieDetailPage: React.FC = () => {
   if (!movie) {
     return (
       <PageContainer>
+        <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Not Found' }]} />
         <BackButton onClick={() => router.back()}>
           ← Back
         </BackButton>
@@ -104,10 +155,13 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <PageContainer>
+      <Breadcrumb items={getBreadcrumbItems()} />
       <BackButton onClick={() => router.back()}>
         ← Back to Movies
       </BackButton>
-      <MovieDetails movie={movie} />
+      <ContentContainer>
+        <MovieDetails movie={movie} />
+      </ContentContainer>
     </PageContainer>
   );
 };
