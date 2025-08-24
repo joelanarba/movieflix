@@ -116,11 +116,20 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
                   <BreadcrumbCurrent title={item.label}>
                     {item.label}
                   </BreadcrumbCurrent>
-                ) : (
+                ) : item.href ? (
                   <>
-                    <BreadcrumbLink href={item.href || '#'}>
+                    <BreadcrumbLink href={item.href}>
                       {item.label}
                     </BreadcrumbLink>
+                    <BreadcrumbSeparator>
+                      <FontAwesomeIcon icon={faChevronRight} />
+                    </BreadcrumbSeparator>
+                  </>
+                ) : (
+                  <>
+                    <BreadcrumbCurrent title={item.label}>
+                      {item.label}
+                    </BreadcrumbCurrent>
                     <BreadcrumbSeparator>
                       <FontAwesomeIcon icon={faChevronRight} />
                     </BreadcrumbSeparator>
