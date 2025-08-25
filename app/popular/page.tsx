@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Movie } from '../../types/movie';
+import { Movie, TMDbResponse } from '../../types/movie';
 import { fetchPopularMovies, discoverMoviesByGenre } from '../../utils/api';
 import MovieGrid from '../../components/Movies/MovieGrid';
 import SearchFilterBar from '../../components/ui/SearchFilterBar';
@@ -111,7 +111,8 @@ const PopularPageWithFilters: React.FC = () => {
       }
       setError(null);
 
-      let result;
+      let result: TMDbResponse<Movie>;
+      
       if (genreIds.length > 0) {
         result = await discoverMoviesByGenre(genreIds, page);
         setIsFiltered(true);
@@ -120,7 +121,8 @@ const PopularPageWithFilters: React.FC = () => {
         result = {
           results: popularMovies,
           total_pages: 500, // TMDb typical max for popular
-          total_results: popularMovies.length
+          total_results: popularMovies.length,
+          page: page
         };
         setIsFiltered(false);
       }
