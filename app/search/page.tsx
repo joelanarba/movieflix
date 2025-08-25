@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
-import { Movie } from '../../types/movie';
+import { Movie, TMDbResponse } from '../../types/movie';
 import { searchMovies, discoverMoviesByGenre } from '../../utils/api';
 import MovieGrid from '../../components/Movies/MovieGrid';
 import SearchBar from '../../components/ui/SearchBar';
@@ -167,14 +167,10 @@ const SearchResultsPage: React.FC = () => {
       }
       setError(null);
 
-      let result;
+      let result: TMDbResponse<Movie>;
+      
       if (searchQuery.trim()) {
-        const searchResult = await searchMovies(searchQuery.trim(), page);
-        result = {
-          results: searchResult.results,
-          total_results: searchResult.total_results,
-          total_pages: searchResult.total_pages
-        };
+        result = await searchMovies(searchQuery.trim(), page);
       } else if (selectedGenres.length > 0) {
         result = await discoverMoviesByGenre(selectedGenres, page);
       } else {
