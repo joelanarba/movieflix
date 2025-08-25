@@ -9,6 +9,7 @@ import {
   faFire, 
   faStar, 
   faClock,
+  faSearch,
   faBars,
   faTimes 
 } from '@fortawesome/free-solid-svg-icons';
@@ -41,6 +42,12 @@ const Navbar: React.FC = () => {
       label: 'Upcoming',
       icon: faClock,
       active: pathname === '/upcoming'
+    },
+    {
+      href: '/search',
+      label: 'Search',
+      icon: faSearch,
+      active: pathname === '/search'
     }
   ];
 

@@ -1,11 +1,12 @@
-
+// Example: app/popular/page.tsx (Updated with filters)
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Movie } from '../../types/movie';
-import { fetchPopularMovies } from '../../utils/api';
+import { fetchPopularMovies, discoverMoviesByGenre } from '../../utils/api';
 import MovieGrid from '../../components/Movies/MovieGrid';
+import SearchFilterBar from '../../components/ui/SearchFilterBar';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 
@@ -57,6 +58,15 @@ const Section = styled.section`
   margin-bottom: 60px;
 `;
 
+const SectionTitle = styled.h2`
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 0 20px;
+`;
+
 const LoadMoreButton = styled.button`
   display: block;
   margin: 40px auto;
@@ -82,15 +92,17 @@ const LoadMoreButton = styled.button`
   }
 `;
 
-const PopularPage: React.FC = () => {
+const PopularPageWithFilters: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+  const [isFiltered, setIsFiltered] = useState(false);
 
-  const loadMovies = async (page: number = 1, append: boolean = false) => {
+  const loadMovies = async (page: number = 1, append: boolean = false, genreIds: number[] = []) => {
     try {
       if (page === 1) {
         setLoading(true);
@@ -99,19 +111,30 @@ const PopularPage: React.FC = () => {
       }
       setError(null);
 
-      const popularMovies = await fetchPopularMovies(page);
-      
-      if (append) {
-        setMovies(prev => [...prev, ...popularMovies]);
+      let result;
+      if (genreIds.length > 0) {
+        result = await discoverMoviesByGenre(genreIds, page);
+        setIsFiltered(true);
       } else {
-        setMovies(popularMovies);
+        const popularMovies = await fetchPopularMovies(page);
+        result = {
+          results: popularMovies,
+          total_pages: 500, // TMDb typical max for popular
+          total_results: popularMovies.length
+        };
+        setIsFiltered(false);
       }
 
-      // Check if we have more pages (TMDb typically has 500+ pages for popular movies)
-      setHasMore(popularMovies.length === 20 && page < 500);
+      if (append) {
+        setMovies(prev => [...prev, ...result.results]);
+      } else {
+        setMovies(result.results);
+      }
+
+      setHasMore(result.results.length === 20 && page < result.total_pages);
     } catch (err) {
-      setError('Failed to load popular movies. Please check your API key and try again.');
-      console.error('Error loading popular movies:', err);
+      setError('Failed to load movies. Please check your API key and try again.');
+      console.error('Error loading movies:', err);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -119,14 +142,19 @@ const PopularPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadMovies(1, false);
-  }, []);
+    loadMovies(1, false, selectedGenres);
+    setCurrentPage(1);
+  }, [selectedGenres]);
+
+  const handleGenreFilter = (genreIds: number[]) => {
+    setSelectedGenres(genreIds);
+  };
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
       const nextPage = currentPage + 1;
       setCurrentPage(nextPage);
-      loadMovies(nextPage, true);
+      loadMovies(nextPage, true, selectedGenres);
     }
   };
 
@@ -155,7 +183,22 @@ const PopularPage: React.FC = () => {
         </HeroSubtitle>
       </HeroSection>
 
+      <SearchFilterBar
+        title="Find Your Perfect Movie"
+        showSearch={true}
+        showGenreFilter={true}
+        searchPlaceholder="Search popular movies..."
+        onGenreFilter={handleGenreFilter}
+        selectedGenres={selectedGenres}
+      />
+
       <Section>
+        <SectionTitle>
+          {isFiltered 
+            ? `Popular Movies${selectedGenres.length > 0 ? ' - Filtered by Genre' : ''}` 
+            : 'All Popular Movies'
+          }
+        </SectionTitle>
         <MovieGrid movies={movies} />
         
         {hasMore && (
@@ -171,4 +214,4 @@ const PopularPage: React.FC = () => {
   );
 };
 
-export default PopularPage;
+export default PopularPageWithFilters;
