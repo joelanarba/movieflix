@@ -104,7 +104,7 @@ const MovieDetailPage: React.FC = () => {
   // Generate breadcrumb items based on the source page and movie title
   const getBreadcrumbItems = (): Array<{ label: string; href?: string }> => {
     const sourcePageInfo = getSourcePageInfo(searchParams);
-    const items = [
+    const items: Array<{ label: string; href?: string }> = [
       { label: 'Home', href: '/' }
     ];
 
