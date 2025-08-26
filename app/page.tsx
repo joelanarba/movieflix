@@ -104,6 +104,68 @@ const TabButton = styled.button<{ $isActive: boolean }>`
   }
 `;
 
+const LoadMoreButton = styled.button`
+  display: block;
+  margin: 40px auto;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+
+  &:hover {
+    background-color: #3182ce;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+  }
+
+  &:disabled {
+    background-color: #4a5568;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+`;
+
+const LoadingMoreContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 12px;
+`;
+
+const LoadingMoreText = styled.span`
+  color: #cbd5e0;
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const LoadingSpinnerSmall = styled.div`
+  width: 24px;
+  height: 24px;
+  border: 2px solid #2d3748;
+  border-top: 2px solid #4299e1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 type TrendingTimeWindow = 'day' | 'week';
 
 const HomePage: React.FC = () => {
@@ -111,30 +173,82 @@ const HomePage: React.FC = () => {
   const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
   const [trendingTimeWindow, setTrendingTimeWindow] = useState<TrendingTimeWindow>('week');
   const [loading, setLoading] = useState(true);
+  const [loadingMoreTrending, setLoadingMoreTrending] = useState(false);
+  const [loadingMorePopular, setLoadingMorePopular] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination states
+  const [trendingPage, setTrendingPage] = useState(1);
+  const [popularPage, setPopularPage] = useState(1);
+  const [hasMoreTrending, setHasMoreTrending] = useState(true);
+  const [hasMorePopular, setHasMorePopular] = useState(true);
+
+  const loadInitialMovies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [trending, popular] = await Promise.all([
+        fetchTrendingMovies(trendingTimeWindow, 1),
+        fetchPopularMovies(1),
+      ]);
+
+      setTrendingMovies(trending);
+      setPopularMovies(popular);
+      setTrendingPage(1);
+      setPopularPage(1);
+      
+      // Check if there are more pages (TMDB returns 20 items per page)
+      setHasMoreTrending(trending.length === 20);
+      setHasMorePopular(popular.length === 20);
+    } catch (err) {
+      setError('Failed to load movies. Please check your API key and try again.');
+      console.error('Error loading movies:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMoreTrending = async () => {
+    if (loadingMoreTrending || !hasMoreTrending) return;
+
+    try {
+      setLoadingMoreTrending(true);
+      const nextPage = trendingPage + 1;
+      const newMovies = await fetchTrendingMovies(trendingTimeWindow, nextPage);
+      
+      setTrendingMovies(prev => [...prev, ...newMovies]);
+      setTrendingPage(nextPage);
+      setHasMoreTrending(newMovies.length === 20);
+    } catch (err) {
+      console.error('Error loading more trending movies:', err);
+      // Don't show error for "load more" failures, just log them
+    } finally {
+      setLoadingMoreTrending(false);
+    }
+  };
+
+  const loadMorePopular = async () => {
+    if (loadingMorePopular || !hasMorePopular) return;
+
+    try {
+      setLoadingMorePopular(true);
+      const nextPage = popularPage + 1;
+      const newMovies = await fetchPopularMovies(nextPage);
+      
+      setPopularMovies(prev => [...prev, ...newMovies]);
+      setPopularPage(nextPage);
+      setHasMorePopular(newMovies.length === 20);
+    } catch (err) {
+      console.error('Error loading more popular movies:', err);
+      // Don't show error for "load more" failures, just log them
+    } finally {
+      setLoadingMorePopular(false);
+    }
+  };
 
   useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [trending, popular] = await Promise.all([
-          fetchTrendingMovies(trendingTimeWindow),
-          fetchPopularMovies(),
-        ]);
-
-        setTrendingMovies(trending);
-        setPopularMovies(popular);
-      } catch (err) {
-        setError('Failed to load movies. Please check your API key and try again.');
-        console.error('Error loading movies:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMovies();
+    loadInitialMovies();
   }, [trendingTimeWindow]);
 
   if (loading) {
@@ -181,6 +295,22 @@ const HomePage: React.FC = () => {
           </TabsContainer>
         </SectionHeader>
         <MovieGrid movies={trendingMovies} />
+        
+        {/* Load More Button for Trending */}
+        {hasMoreTrending && (
+          <>
+            {loadingMoreTrending ? (
+              <LoadingMoreContainer>
+                <LoadingSpinnerSmall />
+                <LoadingMoreText>Loading more trending movies...</LoadingMoreText>
+              </LoadingMoreContainer>
+            ) : (
+              <LoadMoreButton onClick={loadMoreTrending}>
+                Load More Trending Movies
+              </LoadMoreButton>
+            )}
+          </>
+        )}
       </Section>
 
       <Section>
@@ -188,6 +318,22 @@ const HomePage: React.FC = () => {
           <SectionTitle>Popular Movies</SectionTitle>
         </SectionHeader>
         <MovieGrid movies={popularMovies} />
+        
+        {/* Load More Button for Popular */}
+        {hasMorePopular && (
+          <>
+            {loadingMorePopular ? (
+              <LoadingMoreContainer>
+                <LoadingSpinnerSmall />
+                <LoadingMoreText>Loading more popular movies...</LoadingMoreText>
+              </LoadingMoreContainer>
+            ) : (
+              <LoadMoreButton onClick={loadMorePopular}>
+                Load More Popular Movies
+              </LoadMoreButton>
+            )}
+          </>
+        )}
       </Section>
     </HomeContainer>
   );

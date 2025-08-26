@@ -16,13 +16,18 @@ export const getImageUrl = (path: string | null, size: string = 'w500'): string 
   return `${IMAGE_BASE_URL}/${size}${path}`;
 };
 
-export const fetchTrendingMovies = async (timeWindow: 'day' | 'week' = 'week'): Promise<Movie[]> => {
+export const fetchTrendingMovies = async (
+  timeWindow: 'day' | 'week' = 'week', 
+  page: number = 1
+): Promise<Movie[]> => {
   try {
     if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
       throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
     }
     
-    const response = await api.get<TMDbResponse<Movie>>(`/trending/movie/${timeWindow}`);
+    const response = await api.get<TMDbResponse<Movie>>(`/trending/movie/${timeWindow}`, {
+      params: { page }
+    });
     return response.data.results;
   } catch (error) {
     console.error('Error fetching trending movies:', error);
