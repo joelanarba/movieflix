@@ -4,6 +4,8 @@ import React from 'react';
 import styled from 'styled-components';
 import Header from './Header';
 import Footer from './Footer';
+import SignInDialog from '../ui/SignInDialog';
+import { useSignInPrompt } from '../../hooks/useSignInPrompt';
 
 const LayoutContainer = styled.div`
   min-height: 100vh;
@@ -27,11 +29,14 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { showDialog, handleClose } = useSignInPrompt();
+
   return (
     <LayoutContainer>
       <Header />
       <MainContent>{children}</MainContent>
       <Footer />
+      <SignInDialog isOpen={showDialog} onClose={handleClose} />
     </LayoutContainer>
   );
 };
