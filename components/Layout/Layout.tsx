@@ -14,8 +14,12 @@ const LayoutContainer = styled.div`
 `;
 
 const MainContent = styled.main`
-  padding-top: 128px;
+  padding-top: 80px; 
   flex: 1;
+
+  @media (max-width: 768px) {
+    padding-top: 70px; 
+  }
 `;
 
 interface LayoutProps {
