@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle, faFilm } from '@fortawesome/free-brands-svg-icons';
-import { faFilm as faFilmSolid, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../contexts/AuthContext';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faFilm, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../../contexts/AuthContext';
 
 const fadeIn = keyframes`
   from {
@@ -301,7 +301,7 @@ const SignInDialog: React.FC<SignInDialogProps> = ({ isOpen, onClose }) => {
 
         <LogoSection>
           <LogoIcon>
-            <FontAwesomeIcon icon={faFilmSolid} size="2x" color="white" />
+            <FontAwesomeIcon icon={faFilm} size="2x" color="white" />
           </LogoIcon>
           <WelcomeTitle>Welcome to MovieFlix!</WelcomeTitle>
           <WelcomeSubtitle>
