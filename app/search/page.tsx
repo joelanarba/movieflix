@@ -286,7 +286,7 @@ const SearchResultsPage: React.FC = () => {
 
       <ResultsSection>
         {loading ? (
-          <LoadingSpinner text="Searching movies..." />
+          <LoadingSpinner />
         ) : error ? (
           <ErrorMessage message={error} onRetry={() => loadMovies(1, false)} />
         ) : movies.length > 0 ? (
