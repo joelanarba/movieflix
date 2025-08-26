@@ -1,7 +1,7 @@
 // app/search/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import { Movie, TMDbResponse } from '../../types/movie';
@@ -12,6 +12,8 @@ import GenreFilter from '../../components/ui/GenreFilter';
 import Breadcrumb from '../../components/ui/Breadcrumb';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ErrorMessage from '../../components/ui/ErrorMessage';
+
+// ... keep all your existing styled components ...
 
 const PageContainer = styled.div`
   min-height: calc(100vh - 80px);
@@ -145,7 +147,8 @@ const EmptyStateText = styled.p`
   margin: 0 auto;
 `;
 
-const SearchResultsPage: React.FC = () => {
+// Create a separate component for the search functionality
+const SearchResultsContent: React.FC = () => {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams?.get('q') || '');
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
@@ -254,16 +257,8 @@ const SearchResultsPage: React.FC = () => {
     return '';
   };
 
-  // Breadcrumb items
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Search' }
-  ];
-
   return (
-    <PageContainer>
-      <Breadcrumb items={breadcrumbItems} />
-      
+    <>
       <SearchSection>
         <SearchContainer>
           <SearchTitle>Search & Discover Movies</SearchTitle>
@@ -321,6 +316,24 @@ const SearchResultsPage: React.FC = () => {
           </EmptyState>
         )}
       </ResultsSection>
+    </>
+  );
+};
+
+// Main component with Suspense boundary
+const SearchResultsPage: React.FC = () => {
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Search' }
+  ];
+
+  return (
+    <PageContainer>
+      <Breadcrumb items={breadcrumbItems} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <SearchResultsContent />
+      </Suspense>
     </PageContainer>
   );
 };
