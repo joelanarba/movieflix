@@ -1,4 +1,4 @@
-// app/search/page.tsx
+
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
@@ -13,7 +13,6 @@ import Breadcrumb from '../../components/ui/Breadcrumb';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 
-// ... keep all your existing styled components ...
 
 const PageContainer = styled.div`
   min-height: calc(100vh - 80px);

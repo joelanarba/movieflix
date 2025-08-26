@@ -1,10 +1,15 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { Movie } from '../types/movie';
+import { TVShow } from '../types/tv';
 import { fetchTrendingMovies, fetchPopularMovies } from '../utils/api';
+import { fetchPopularTVShows, fetchTrendingTVShows } from '../utils/tvApi';
 import MovieGrid from '../components/Movies/MovieGrid';
+import TVGrid from '../components/TV/TVGrid';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorMessage from '../components/ui/ErrorMessage';
 
@@ -67,6 +72,12 @@ const SectionHeader = styled.div`
   margin-right: auto;
 `;
 
+const SectionTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
 const SectionTitle = styled.h2`
   font-size: 32px;
   font-weight: bold;
@@ -74,6 +85,27 @@ const SectionTitle = styled.h2`
 
   @media (max-width: 768px) {
     font-size: 24px;
+  }
+`;
+
+const ViewAllLink = styled(Link)`
+  color: #4299e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #4299e1;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #4299e1;
+    color: #ffffff;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 6px 12px;
   }
 `;
 
@@ -95,6 +127,36 @@ const TabButton = styled.button<{ $isActive: boolean }>`
 
   &:hover {
     background-color: ${(props) => (props.$isActive ? '#3182ce' : '#4a5568')};
+    color: #ffffff;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+`;
+
+const ContentTypeToggle = styled.div`
+  display: flex;
+  gap: 4px;
+  background-color: #2d3748;
+  padding: 4px;
+  border-radius: 8px;
+`;
+
+const ContentTypeButton = styled.button<{ $isActive: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: ${(props) => (props.$isActive ? '#4299e1' : 'transparent')};
+  color: ${(props) => (props.$isActive ? '#ffffff' : '#cbd5e0')};
+
+  &:hover {
+    background-color: ${(props) => (props.$isActive ? '#3182ce' : 'rgba(66, 153, 225, 0.1)')};
     color: #ffffff;
   }
 
@@ -167,11 +229,17 @@ const LoadingSpinnerSmall = styled.div`
 `;
 
 type TrendingTimeWindow = 'day' | 'week';
+type ContentType = 'movie' | 'tv';
 
 const HomePage: React.FC = () => {
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
+  const [trendingTVShows, setTrendingTVShows] = useState<TVShow[]>([]);
+  const [popularTVShows, setPopularTVShows] = useState<TVShow[]>([]);
+  
   const [trendingTimeWindow, setTrendingTimeWindow] = useState<TrendingTimeWindow>('week');
+  const [trendingContentType, setTrendingContentType] = useState<ContentType>('movie');
+  
   const [loading, setLoading] = useState(true);
   const [loadingMoreTrending, setLoadingMoreTrending] = useState(false);
   const [loadingMorePopular, setLoadingMorePopular] = useState(false);
@@ -183,27 +251,32 @@ const HomePage: React.FC = () => {
   const [hasMoreTrending, setHasMoreTrending] = useState(true);
   const [hasMorePopular, setHasMorePopular] = useState(true);
 
-  const loadInitialMovies = async () => {
+  const loadInitialContent = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [trending, popular] = await Promise.all([
+      const [trendingMoviesData, popularMoviesData, trendingTVData, popularTVData] = await Promise.all([
         fetchTrendingMovies(trendingTimeWindow, 1),
         fetchPopularMovies(1),
+        fetchTrendingTVShows(trendingTimeWindow, 1),
+        fetchPopularTVShows(1),
       ]);
 
-      setTrendingMovies(trending);
-      setPopularMovies(popular);
+      setTrendingMovies(trendingMoviesData);
+      setPopularMovies(popularMoviesData);
+      setTrendingTVShows(trendingTVData);
+      setPopularTVShows(popularTVData);
+      
       setTrendingPage(1);
       setPopularPage(1);
       
-      // Check if there are more pages (TMDB returns 20 items per page)
-      setHasMoreTrending(trending.length === 20);
-      setHasMorePopular(popular.length === 20);
+      // Check if there are more pages
+      setHasMoreTrending(trendingMoviesData.length === 20 || trendingTVData.length === 20);
+      setHasMorePopular(popularMoviesData.length === 20 || popularTVData.length === 20);
     } catch (err) {
-      setError('Failed to load movies. Please check your API key and try again.');
-      console.error('Error loading movies:', err);
+      setError('Failed to load content. Please check your API key and try again.');
+      console.error('Error loading content:', err);
     } finally {
       setLoading(false);
     }
@@ -215,14 +288,20 @@ const HomePage: React.FC = () => {
     try {
       setLoadingMoreTrending(true);
       const nextPage = trendingPage + 1;
-      const newMovies = await fetchTrendingMovies(trendingTimeWindow, nextPage);
       
-      setTrendingMovies(prev => [...prev, ...newMovies]);
+      if (trendingContentType === 'movie') {
+        const newMovies = await fetchTrendingMovies(trendingTimeWindow, nextPage);
+        setTrendingMovies(prev => [...prev, ...newMovies]);
+        setHasMoreTrending(newMovies.length === 20);
+      } else {
+        const newTVShows = await fetchTrendingTVShows(trendingTimeWindow, nextPage);
+        setTrendingTVShows(prev => [...prev, ...newTVShows]);
+        setHasMoreTrending(newTVShows.length === 20);
+      }
+      
       setTrendingPage(nextPage);
-      setHasMoreTrending(newMovies.length === 20);
     } catch (err) {
-      console.error('Error loading more trending movies:', err);
-      // Don't show error for "load more" failures, just log them
+      console.error('Error loading more trending content:', err);
     } finally {
       setLoadingMoreTrending(false);
     }
@@ -241,15 +320,24 @@ const HomePage: React.FC = () => {
       setHasMorePopular(newMovies.length === 20);
     } catch (err) {
       console.error('Error loading more popular movies:', err);
-      // Don't show error for "load more" failures, just log them
     } finally {
       setLoadingMorePopular(false);
     }
   };
 
   useEffect(() => {
-    loadInitialMovies();
+    loadInitialContent();
   }, [trendingTimeWindow]);
+
+  const handleTrendingTimeWindowChange = (timeWindow: TrendingTimeWindow) => {
+    setTrendingTimeWindow(timeWindow);
+    setTrendingPage(1);
+    setHasMoreTrending(true);
+  };
+
+  const handleTrendingContentTypeChange = (contentType: ContentType) => {
+    setTrendingContentType(contentType);
+  };
 
   if (loading) {
     return (
@@ -270,43 +358,63 @@ const HomePage: React.FC = () => {
   return (
     <HomeContainer>
       <HeroSection>
-        <HeroTitle>Discover Amazing Movies</HeroTitle>
+        <HeroTitle>Discover Amazing Movies & TV Shows</HeroTitle>
         <HeroSubtitle>
-          Explore trending films, discover new favorites, and dive deep into the world of cinema
+          Explore trending films, discover new favorites, and dive deep into the world of cinema and television
         </HeroSubtitle>
       </HeroSection>
 
       <Section>
         <SectionHeader>
-          <SectionTitle>Trending Movies</SectionTitle>
+          <SectionTitleContainer>
+            <SectionTitle>Trending</SectionTitle>
+            <ContentTypeToggle>
+              <ContentTypeButton
+                $isActive={trendingContentType === 'movie'}
+                onClick={() => handleTrendingContentTypeChange('movie')}
+              >
+                Movies
+              </ContentTypeButton>
+              <ContentTypeButton
+                $isActive={trendingContentType === 'tv'}
+                onClick={() => handleTrendingContentTypeChange('tv')}
+              >
+                TV Shows
+              </ContentTypeButton>
+            </ContentTypeToggle>
+          </SectionTitleContainer>
           <TabsContainer>
             <TabButton
               $isActive={trendingTimeWindow === 'day'}
-              onClick={() => setTrendingTimeWindow('day')}
+              onClick={() => handleTrendingTimeWindowChange('day')}
             >
               Today
             </TabButton>
             <TabButton
               $isActive={trendingTimeWindow === 'week'}
-              onClick={() => setTrendingTimeWindow('week')}
+              onClick={() => handleTrendingTimeWindowChange('week')}
             >
               This Week
             </TabButton>
           </TabsContainer>
         </SectionHeader>
-        <MovieGrid movies={trendingMovies} />
         
-        {/* Load More Button for Trending */}
+        {trendingContentType === 'movie' ? (
+          <MovieGrid movies={trendingMovies} />
+        ) : (
+          <TVGrid tvShows={trendingTVShows} />
+        )}
+        
         {hasMoreTrending && (
           <>
             {loadingMoreTrending ? (
               <LoadingMoreContainer>
                 <LoadingSpinnerSmall />
-                <LoadingMoreText>Loading more trending movies...</LoadingMoreText>
+                <LoadingMoreText>Loading more trending {trendingContentType === 'movie' ? 'movies' : 'TV shows'}...</LoadingMoreText>
               </LoadingMoreContainer>
             ) : (
               <LoadMoreButton onClick={loadMoreTrending}>
-                Load More Trending Movies
+                Load More Trending {trendingContentType === 'movie' ? 'Movies' : 'TV Shows'}
               </LoadMoreButton>
             )}
           </>
@@ -315,25 +423,22 @@ const HomePage: React.FC = () => {
 
       <Section>
         <SectionHeader>
-          <SectionTitle>Popular Movies</SectionTitle>
+          <SectionTitleContainer>
+            <SectionTitle>Popular Movies</SectionTitle>
+            <ViewAllLink href="/popular">View All</ViewAllLink>
+          </SectionTitleContainer>
         </SectionHeader>
-        <MovieGrid movies={popularMovies} />
-        
-        {/* Load More Button for Popular */}
-        {hasMorePopular && (
-          <>
-            {loadingMorePopular ? (
-              <LoadingMoreContainer>
-                <LoadingSpinnerSmall />
-                <LoadingMoreText>Loading more popular movies...</LoadingMoreText>
-              </LoadingMoreContainer>
-            ) : (
-              <LoadMoreButton onClick={loadMorePopular}>
-                Load More Popular Movies
-              </LoadMoreButton>
-            )}
-          </>
-        )}
+        <MovieGrid movies={popularMovies.slice(0, 10)} />
+      </Section>
+
+      <Section>
+        <SectionHeader>
+          <SectionTitleContainer>
+            <SectionTitle>Popular TV Shows</SectionTitle>
+            <ViewAllLink href="/tv">View All</ViewAllLink>
+          </SectionTitleContainer>
+        </SectionHeader>
+        <TVGrid tvShows={popularTVShows.slice(0, 10)} />
       </Section>
     </HomeContainer>
   );

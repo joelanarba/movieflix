@@ -11,7 +11,8 @@ import {
   faClock,
   faSearch,
   faBars,
-  faTimes 
+  faTimes,
+  faTv
 } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar: React.FC = () => {
@@ -24,6 +25,12 @@ const Navbar: React.FC = () => {
       label: 'Home',
       icon: faHome,
       active: pathname === '/'
+    },
+    {
+      href: '/tv',
+      label: 'TV Shows',
+      icon: faTv,
+      active: pathname === '/tv' || pathname?.startsWith('/tv/')
     },
     {
       href: '/popular',
@@ -103,7 +110,7 @@ const Navbar: React.FC = () => {
       {/* Mobile Navigation Menu */}
       <div className={`
         md:hidden transition-all duration-300 ease-in-out overflow-hidden
-        ${isMobileMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}
+        ${isMobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
       `}>
         <div className="px-2 pt-2 pb-3 space-y-1 bg-slate-800/95 backdrop-blur-sm border-t border-slate-600">
           {navLinks.map((link) => (
