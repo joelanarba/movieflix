@@ -3,7 +3,9 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
+import { AuthProvider } from '../contexts/AuthContext';
 import Layout from '../components/Layout/Layout';
+import StyledComponentsRegistry from '../lib/styled-components-registry';
 import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,9 +24,13 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={inter.className}>
-        <FavoritesProvider>
-          <Layout>{children}</Layout>
-        </FavoritesProvider>
+        <StyledComponentsRegistry>
+          <AuthProvider>
+            <FavoritesProvider>
+              <Layout>{children}</Layout>
+            </FavoritesProvider>
+          </AuthProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

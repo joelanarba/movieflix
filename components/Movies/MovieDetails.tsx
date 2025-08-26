@@ -15,6 +15,7 @@ import { MovieDetails as MovieDetailsType } from '../../types/movie';
 import { getImageUrl } from '../../utils/api';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import RecommendedMovies from './RecommendedMovies';
+import MovieReviews from './MovieReviews';
 
 const DetailsContainer = styled.div`
   max-width: 1200px;
@@ -354,6 +355,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           </CastGrid>
         </CastSection>
       )}
+
+      <MovieReviews movieId={movie.id} />
 
       <RecommendedMovies movieId={movie.id} />
     </DetailsContainer>

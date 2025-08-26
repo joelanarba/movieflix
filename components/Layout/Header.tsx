@@ -2,12 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import Navbar from './Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilm, faHeart, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faFilm, faHeart, faHome, faSignInAlt, faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../contexts/FavoritesContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const HeaderContainer = styled.header`
   position: fixed;
@@ -78,6 +79,56 @@ const NavLink = styled(Link)<{ $isActive?: boolean }>`
   }
 `;
 
+const AuthButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #4299e1;
+  color: #4299e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #4299e1;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cbd5e0;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
+`;
+
+const UserAvatar = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #4299e1;
+`;
+
+const UserName = styled.span`
+  font-weight: 500;
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
+`;
+
 const FavoritesCounter = styled.span`
   background-color: #e53e3e;
   color: white;
@@ -92,9 +143,23 @@ const FavoritesCounter = styled.span`
 
 const Header: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { favorites } = useFavorites();
+  const { user, logout, loading } = useAuth();
 
   const isActive = (path: string) => pathname === path;
+
+  const handleAuthAction = async () => {
+    if (user) {
+      try {
+        await logout();
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
+    } else {
+      router.push('/login');
+    }
+  };
 
   return (
     <HeaderContainer>
@@ -115,6 +180,26 @@ const Header: React.FC = () => {
               <FavoritesCounter>{favorites.length}</FavoritesCounter>
             )}
           </NavLink>
+          
+          {!loading && (
+            <>
+              {user ? (
+                <UserInfo>
+                  <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name} />
+                  <UserName>{user.name}</UserName>
+                  <AuthButton onClick={handleAuthAction}>
+                    <FontAwesomeIcon icon={faSignOutAlt} />
+                    <span>Logout</span>
+                  </AuthButton>
+                </UserInfo>
+              ) : (
+                <AuthButton onClick={handleAuthAction}>
+                  <FontAwesomeIcon icon={faSignInAlt} />
+                  <span>Sign In</span>
+                </AuthButton>
+              )}
+            </>
+          )}
         </NavLinks>
       </Nav>
       {/* Add the navbar here */}

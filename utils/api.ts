@@ -1,46 +1,5 @@
-export const fetchGenres = async (): Promise<Genre[]> => {
-  try {
-    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
-      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
-    }
-    
-    const response = await api.get<{ genres: Genre[] }>('/genre/movie/list');
-    return response.data.genres;
-  } catch (error) {
-    console.error('Error fetching genres:', error);
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
-    }
-    throw new Error('Failed to fetch genres');
-  }
-};
-
-export const discoverMoviesByGenre = async (
-  genreIds: number[], 
-  page: number = 1
-): Promise<TMDbResponse<Movie>> => {
-  try {
-    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
-      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
-    }
-    
-    const response = await api.get<TMDbResponse<Movie>>('/discover/movie', {
-      params: {
-        with_genres: genreIds.join(','),
-        page,
-        sort_by: 'popularity.desc',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error discovering movies by genre:', error);
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
-    }
-    throw new Error('Failed to discover movies by genre');
-  }
-};import axios from 'axios';
-import { Movie, MovieDetails, TMDbResponse, Genre } from '../types/movie';
+import axios from 'axios';
+import { Movie, MovieDetails, TMDbResponse, Genre, MovieReview } from '../types/movie';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -197,5 +156,65 @@ export const fetchRecommendations = async (movieId: string): Promise<Movie[]> =>
       throw new Error('Invalid API key. Please check your TMDb API key configuration.');
     }
     throw new Error('Failed to fetch recommendations');
+  }
+};
+
+export const fetchMovieReviews = async (movieId: string): Promise<MovieReview[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<TMDbResponse<MovieReview>>(`/movie/${movieId}/reviews`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching movie reviews:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch movie reviews');
+  }
+};
+
+export const fetchGenres = async (): Promise<Genre[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<{ genres: Genre[] }>('/genre/movie/list');
+    return response.data.genres;
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch genres');
+  }
+};
+
+export const discoverMoviesByGenre = async (
+  genreIds: number[], 
+  page: number = 1
+): Promise<TMDbResponse<Movie>> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<TMDbResponse<Movie>>('/discover/movie', {
+      params: {
+        with_genres: genreIds.join(','),
+        page,
+        sort_by: 'popularity.desc',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error discovering movies by genre:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to discover movies by genre');
   }
 };
