@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -200,8 +201,26 @@ const CastGrid = styled.div`
   gap: 16px;
 `;
 
+const CastMemberLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
+`;
+
 const CastMember = styled.div`
   text-align: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(45, 55, 72, 0.3);
+  }
 `;
 
 const CastImage = styled.img`
@@ -212,6 +231,11 @@ const CastImage = styled.img`
   margin: 0 auto 8px;
   display: block;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+
+  ${CastMember}:hover & {
+    box-shadow: 0 6px 16px rgba(66, 153, 225, 0.4);
+  }
 `;
 
 const CastImagePlaceholder = styled.div`
@@ -225,6 +249,11 @@ const CastImagePlaceholder = styled.div`
   justify-content: center;
   color: #718096;
   font-size: 12px;
+  transition: all 0.3s ease;
+
+  ${CastMember}:hover & {
+    background-color: #4a5568;
+  }
 `;
 
 const CastName = styled.div`
@@ -232,6 +261,11 @@ const CastName = styled.div`
   font-weight: 500;
   color: #ffffff;
   margin-bottom: 4px;
+  transition: color 0.3s ease;
+
+  ${CastMember}:hover & {
+    color: #4299e1;
+  }
 `;
 
 const CharacterName = styled.div`
@@ -339,18 +373,23 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           <SectionTitle>Cast</SectionTitle>
           <CastGrid>
             {topCast.map((castMember) => (
-              <CastMember key={castMember.id}>
-                {castMember.profile_path ? (
-                  <CastImage
-                    src={getImageUrl(castMember.profile_path, 'w185')}
-                    alt={castMember.name}
-                  />
-                ) : (
-                  <CastImagePlaceholder>No Photo</CastImagePlaceholder>
-                )}
-                <CastName>{castMember.name}</CastName>
-                <CharacterName>{castMember.character}</CharacterName>
-              </CastMember>
+              <CastMemberLink 
+                key={castMember.id} 
+                href={`/person/${castMember.id}`}
+              >
+                <CastMember>
+                  {castMember.profile_path ? (
+                    <CastImage
+                      src={getImageUrl(castMember.profile_path, 'w185')}
+                      alt={castMember.name}
+                    />
+                  ) : (
+                    <CastImagePlaceholder>No Photo</CastImagePlaceholder>
+                  )}
+                  <CastName>{castMember.name}</CastName>
+                  <CharacterName>{castMember.character}</CharacterName>
+                </CastMember>
+              </CastMemberLink>
             ))}
           </CastGrid>
         </CastSection>

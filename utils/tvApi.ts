@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { TVShow, TVShowDetails, TMDbResponse, Person } from '../types/tv';
 
@@ -113,7 +112,7 @@ export const fetchPersonDetails = async (personId: string): Promise<Person> => {
     
     const response = await api.get<Person>(`/person/${personId}`, {
       params: {
-        append_to_response: 'movie_credits,tv_credits',
+        append_to_response: 'movie_credits,tv_credits,combined_credits',
       },
     });
     return response.data;
@@ -126,6 +125,26 @@ export const fetchPersonDetails = async (personId: string): Promise<Person> => {
       throw new Error('Person not found.');
     }
     throw new Error('Failed to fetch person details');
+  }
+};
+
+export const fetchPersonCombinedCredits = async (personId: string): Promise<any> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get(`/person/${personId}/combined_credits`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching person combined credits:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new Error('Person credits not found.');
+    }
+    throw new Error('Failed to fetch person combined credits');
   }
 };
 
