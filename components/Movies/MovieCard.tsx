@@ -5,7 +5,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faCalendar, faHeart } from '@fortawesome/free-solid-svg-icons';
-import { Movie, FavoriteMovie } from '../../types/movie';
+import { Movie } from '../../types/movie';
 import { getImageUrl } from '../../utils/api';
 import { useFavorites } from '../../contexts/FavoritesContext';
 
@@ -325,16 +325,9 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     if (isFavorite(movie.id)) {
       removeFromFavorites(movie.id);
     } else {
-      // Create a FavoriteMovie object with the addedAt property
-      const favoriteMovie: FavoriteMovie = {
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        release_date: movie.release_date,
-        vote_average: movie.vote_average,
-        addedAt: new Date().toISOString()
-      };
-      addToFavorites(favoriteMovie);
+      // Pass the full movie object to addToFavorites
+      // The context will handle adding the addedAt property
+      addToFavorites(movie);
     }
   };
 
