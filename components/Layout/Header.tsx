@@ -260,6 +260,14 @@ const SectionTitle = styled.div`
   }
 `;
 
+// Define interface for navigation items
+interface NavItem {
+  href: string;
+  label: string;
+  icon: any;
+  badge?: number;
+}
+
 const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -297,12 +305,12 @@ const Header: React.FC = () => {
   const navItems = {
     main: [
       { href: '/', label: 'Home', icon: faHome }
-    ],
+    ] as NavItem[],
     browse: [
       { href: '/movies', label: 'Movies', icon: faFilm },
       { href: '/tv', label: 'TV Shows', icon: faTv },
       { href: '/search', label: 'Search', icon: faSearch }
-    ],
+    ] as NavItem[],
     user: [
       { 
         href: '/favorites', 
@@ -310,11 +318,11 @@ const Header: React.FC = () => {
         icon: faHeart,
         badge: favorites.length > 0 ? favorites.length : undefined 
       }
-    ]
+    ] as NavItem[]
   };
 
   // For desktop, show only essential items
-  const desktopNavItems = [
+  const desktopNavItems: NavItem[] = [
     ...navItems.main,
     ...navItems.browse.slice(0, 2), // Movies and TV Shows
     ...navItems.user
