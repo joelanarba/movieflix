@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -15,7 +14,15 @@ import ErrorMessage from '../components/ui/ErrorMessage';
 
 const HomeContainer = styled.div`
   min-height: calc(100vh - 80px);
-  padding: 40px 0;
+  padding: 20px 0 40px;
+
+  @media (max-width: 768px) {
+    padding: 16px 0 32px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 0 24px;
+  }
 `;
 
 const HeroSection = styled.section`
@@ -23,42 +30,44 @@ const HeroSection = styled.section`
   padding: 60px 20px;
   background: linear-gradient(135deg, #1a1d29 0%, #2d3748 50%, #1a1d29 100%);
   margin-bottom: 40px;
+
+  @media (max-width: 768px) {
+    padding: 40px 16px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 32px 12px;
+    margin-bottom: 24px;
+  }
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 48px;
+  font-size: clamp(28px, 6vw, 48px);
   font-weight: bold;
   color: #ffffff;
   margin-bottom: 16px;
   line-height: 1.2;
-
-  @media (max-width: 768px) {
-    font-size: 36px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 28px;
-  }
 `;
 
 const HeroSubtitle = styled.p`
-  font-size: 20px;
+  font-size: clamp(16px, 3vw, 20px);
   color: #cbd5e0;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
-
-  @media (max-width: 768px) {
-    font-size: 18px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 16px;
-  }
 `;
 
 const Section = styled.section`
-  margin-bottom: 60px;
+  margin-bottom: 48px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 32px;
+  }
 `;
 
 const SectionHeader = styled.div`
@@ -66,26 +75,46 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    padding: 0 16px;
+    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 12px;
+    gap: 8px;
+  }
 `;
 
 const SectionTitleContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 32px;
+  font-size: clamp(24px, 4vw, 32px);
   font-weight: bold;
   color: #ffffff;
-
-  @media (max-width: 768px) {
-    font-size: 24px;
-  }
 `;
 
 const ViewAllLink = styled(Link)`
@@ -93,10 +122,14 @@ const ViewAllLink = styled(Link)`
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-radius: 6px;
   border: 1px solid #4299e1;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 
   &:hover {
     background-color: #4299e1;
@@ -104,18 +137,25 @@ const ViewAllLink = styled(Link)`
   }
 
   @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: 13px;
+    padding: 8px 12px;
+    min-height: 36px;
   }
 `;
 
 const TabsContainer = styled.div`
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
 `;
 
 const TabButton = styled.button<{ $isActive: boolean }>`
-  padding: 8px 16px;
+  padding: 10px 16px;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -124,6 +164,8 @@ const TabButton = styled.button<{ $isActive: boolean }>`
   transition: all 0.3s ease;
   background-color: ${(props) => (props.$isActive ? '#4299e1' : '#2d3748')};
   color: ${(props) => (props.$isActive ? '#ffffff' : '#cbd5e0')};
+  white-space: nowrap;
+  min-height: 40px;
 
   &:hover {
     background-color: ${(props) => (props.$isActive ? '#3182ce' : '#4a5568')};
@@ -131,8 +173,9 @@ const TabButton = styled.button<{ $isActive: boolean }>`
   }
 
   @media (max-width: 480px) {
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 36px;
   }
 `;
 
@@ -154,6 +197,7 @@ const ContentTypeButton = styled.button<{ $isActive: boolean }>`
   transition: all 0.3s ease;
   background-color: ${(props) => (props.$isActive ? '#4299e1' : 'transparent')};
   color: ${(props) => (props.$isActive ? '#ffffff' : '#cbd5e0')};
+  white-space: nowrap;
 
   &:hover {
     background-color: ${(props) => (props.$isActive ? '#3182ce' : 'rgba(66, 153, 225, 0.1)')};
@@ -162,13 +206,13 @@ const ContentTypeButton = styled.button<{ $isActive: boolean }>`
 
   @media (max-width: 480px) {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 13px;
   }
 `;
 
 const LoadMoreButton = styled.button`
   display: block;
-  margin: 40px auto;
+  margin: 32px auto 0;
   background-color: #4299e1;
   color: white;
   border: none;
@@ -179,6 +223,7 @@ const LoadMoreButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+  min-height: 48px;
 
   &:hover {
     background-color: #3182ce;
@@ -197,6 +242,13 @@ const LoadMoreButton = styled.button`
   @media (max-width: 768px) {
     padding: 12px 24px;
     font-size: 14px;
+    margin: 24px auto 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin: 20px auto 0;
   }
 `;
 
@@ -204,14 +256,26 @@ const LoadingMoreContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  padding: 32px 20px;
   gap: 12px;
+
+  @media (max-width: 768px) {
+    padding: 24px 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px 12px;
+  }
 `;
 
 const LoadingMoreText = styled.span`
   color: #cbd5e0;
   font-size: 16px;
   font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const LoadingSpinnerSmall = styled.div`
@@ -225,6 +289,11 @@ const LoadingSpinnerSmall = styled.div`
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 480px) {
+    width: 20px;
+    height: 20px;
   }
 `;
 
@@ -242,14 +311,11 @@ const HomePage: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [loadingMoreTrending, setLoadingMoreTrending] = useState(false);
-  const [loadingMorePopular, setLoadingMorePopular] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Pagination states
   const [trendingPage, setTrendingPage] = useState(1);
-  const [popularPage, setPopularPage] = useState(1);
   const [hasMoreTrending, setHasMoreTrending] = useState(true);
-  const [hasMorePopular, setHasMorePopular] = useState(true);
 
   const loadInitialContent = async () => {
     try {
@@ -269,11 +335,9 @@ const HomePage: React.FC = () => {
       setPopularTVShows(popularTVData);
       
       setTrendingPage(1);
-      setPopularPage(1);
       
       // Check if there are more pages
       setHasMoreTrending(trendingMoviesData.length === 20 || trendingTVData.length === 20);
-      setHasMorePopular(popularMoviesData.length === 20 || popularTVData.length === 20);
     } catch (err) {
       setError('Failed to load content. Please check your API key and try again.');
       console.error('Error loading content:', err);
@@ -304,24 +368,6 @@ const HomePage: React.FC = () => {
       console.error('Error loading more trending content:', err);
     } finally {
       setLoadingMoreTrending(false);
-    }
-  };
-
-  const loadMorePopular = async () => {
-    if (loadingMorePopular || !hasMorePopular) return;
-
-    try {
-      setLoadingMorePopular(true);
-      const nextPage = popularPage + 1;
-      const newMovies = await fetchPopularMovies(nextPage);
-      
-      setPopularMovies(prev => [...prev, ...newMovies]);
-      setPopularPage(nextPage);
-      setHasMorePopular(newMovies.length === 20);
-    } catch (err) {
-      console.error('Error loading more popular movies:', err);
-    } finally {
-      setLoadingMorePopular(false);
     }
   };
 
@@ -425,8 +471,8 @@ const HomePage: React.FC = () => {
         <SectionHeader>
           <SectionTitleContainer>
             <SectionTitle>Popular Movies</SectionTitle>
-            <ViewAllLink href="/popular">View All</ViewAllLink>
           </SectionTitleContainer>
+          <ViewAllLink href="/movies">View All Movies</ViewAllLink>
         </SectionHeader>
         <MovieGrid movies={popularMovies.slice(0, 10)} />
       </Section>
@@ -435,8 +481,8 @@ const HomePage: React.FC = () => {
         <SectionHeader>
           <SectionTitleContainer>
             <SectionTitle>Popular TV Shows</SectionTitle>
-            <ViewAllLink href="/tv">View All</ViewAllLink>
           </SectionTitleContainer>
+          <ViewAllLink href="/tv">View All TV Shows</ViewAllLink>
         </SectionHeader>
         <TVGrid tvShows={popularTVShows.slice(0, 10)} />
       </Section>

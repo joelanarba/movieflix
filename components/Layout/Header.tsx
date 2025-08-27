@@ -13,9 +13,7 @@ import {
   faSignOutAlt, 
   faBars, 
   faTimes,
-  faFire,
-  faStar,
-  faClock,
+  faTv,
   faSearch
 } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -116,6 +114,8 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
   transition: all 0.3s ease;
   padding: 16px;
   display: none;
+  max-height: 90vh;
+  overflow-y: auto;
 
   @media (max-width: 768px) {
     display: block;
@@ -125,31 +125,33 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
 const MobileNavLinks = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const NavLink = styled(Link)<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   color: ${(props) => (props.$isActive ? '#4299e1' : '#cbd5e0')};
   font-weight: 500;
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 8px;
   background-color: ${(props) => (props.$isActive ? 'rgba(66, 153, 225, 0.1)' : 'transparent')};
   transition: all 0.3s ease;
   font-size: 14px;
   border: ${(props) => (props.$isActive ? '1px solid rgba(66, 153, 225, 0.3)' : '1px solid transparent')};
+  min-height: 44px;
 
   &:hover {
     color: #4299e1;
     background-color: rgba(66, 153, 225, 0.1);
   }
 
-  @media (max-width: 480px) {
-    padding: 12px 16px;
-    font-size: 14px;
+  @media (max-width: 768px) {
+    padding: 14px 16px;
+    font-size: 15px;
+    min-height: 48px;
   }
 `;
 
@@ -173,6 +175,7 @@ const AuthButton = styled.button`
   transition: all 0.3s ease;
   font-size: 14px;
   white-space: nowrap;
+  min-height: 36px;
 
   &:hover {
     background-color: #4299e1;
@@ -180,8 +183,8 @@ const AuthButton = styled.button`
   }
 
   @media (max-width: 480px) {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 8px 10px;
+    font-size: 13px;
     gap: 4px;
   }
 `;
@@ -194,14 +197,15 @@ const UserInfo = styled.div`
 `;
 
 const UserAvatar = styled.img`
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid #4299e1;
+  object-fit: cover;
 
   @media (max-width: 480px) {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
 `;
 
@@ -217,35 +221,43 @@ const UserName = styled.span`
 const FavoritesCounter = styled.span`
   background-color: #e53e3e;
   color: white;
-  border-radius: 10px;
-  padding: 2px 6px;
+  border-radius: 12px;
+  padding: 2px 8px;
   font-size: 11px;
   font-weight: bold;
-  margin-left: 4px;
-  min-width: 18px;
+  margin-left: auto;
+  min-width: 20px;
   text-align: center;
-  line-height: 1;
+  line-height: 1.2;
 
   @media (max-width: 480px) {
-    padding: 1px 4px;
+    padding: 2px 6px;
     font-size: 10px;
-    min-width: 16px;
+    min-width: 18px;
   }
 `;
 
 const MobileAuthSection = styled.div`
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid #2d3748;
   display: flex;
   flex-direction: column;
   gap: 12px;
 `;
 
-const Divider = styled.div`
-  height: 1px;
-  background-color: #2d3748;
-  margin: 12px 0;
+const SectionTitle = styled.div`
+  fontSize: 12px;
+  font-weight: bold;
+  color: #718096;
+  margin: 16px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 16px;
+
+  &:first-child {
+    margin-top: 0;
+  }
 `;
 
 const Header: React.FC = () => {
@@ -255,7 +267,10 @@ const Header: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/') return pathname === path;
+    return pathname.startsWith(path);
+  };
 
   const handleAuthAction = async () => {
     if (user) {
@@ -278,26 +293,32 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(false);
   };
 
-  // All navigation items in one place
-  const allNavItems = [
-    { href: '/', label: 'Home', icon: faHome, category: 'main' },
-    { href: '/popular', label: 'Popular', icon: faFire, category: 'browse' },
-    { href: '/top-rated', label: 'Top Rated', icon: faStar, category: 'browse' },
-    { href: '/upcoming', label: 'Upcoming', icon: faClock, category: 'browse' },
-    { href: '/search', label: 'Search', icon: faSearch, category: 'browse' },
-    { 
-      href: '/favorites', 
-      label: 'Favorites', 
-      icon: faHeart, 
-      category: 'user',
-      badge: favorites.length > 0 ? favorites.length : undefined 
-    }
-  ];
+  // Navigation items organized by category
+  const navItems = {
+    main: [
+      { href: '/', label: 'Home', icon: faHome }
+    ],
+    browse: [
+      { href: '/movies', label: 'Movies', icon: faFilm },
+      { href: '/tv', label: 'TV Shows', icon: faTv },
+      { href: '/search', label: 'Search', icon: faSearch }
+    ],
+    user: [
+      { 
+        href: '/favorites', 
+        label: 'Favorites', 
+        icon: faHeart,
+        badge: favorites.length > 0 ? favorites.length : undefined 
+      }
+    ]
+  };
 
   // For desktop, show only essential items
-  const desktopNavItems = allNavItems.filter(item => 
-    item.category === 'main' || item.category === 'user'
-  );
+  const desktopNavItems = [
+    ...navItems.main,
+    ...navItems.browse.slice(0, 2), // Movies and TV Shows
+    ...navItems.user
+  ];
 
   return (
     <HeaderContainer>
@@ -307,7 +328,7 @@ const Header: React.FC = () => {
           <span>MovieFlix</span>
         </Logo>
 
-        {/* Desktop Navigation - Essential items only */}
+        {/* Desktop Navigation */}
         <DesktopNavLinks>
           {desktopNavItems.map((item) => (
             <NavLink key={item.href} href={item.href} $isActive={isActive(item.href)}>
@@ -324,7 +345,7 @@ const Header: React.FC = () => {
               {user ? (
                 <>
                   <UserInfo>
-                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name} />
+                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name || 'User'} />
                     <UserName>{user.name}</UserName>
                   </UserInfo>
                   <AuthButton onClick={handleAuthAction}>
@@ -347,92 +368,53 @@ const Header: React.FC = () => {
           <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} />
         </MobileMenuButton>
 
-        {/* Mobile Menu - All navigation items */}
+        {/* Mobile Menu */}
         <MobileMenu $isOpen={isMobileMenuOpen}>
           <MobileNavLinks>
             {/* Main Navigation */}
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ 
-                fontSize: '12px', 
-                fontWeight: 'bold', 
-                color: '#718096', 
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Main
-              </div>
-              {allNavItems.filter(item => item.category === 'main').map((item) => (
-                <NavLink 
-                  key={item.href} 
-                  href={item.href} 
-                  $isActive={isActive(item.href)}
-                  onClick={closeMobileMenu}
-                >
-                  <FontAwesomeIcon icon={item.icon} />
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <FavoritesCounter>{item.badge}</FavoritesCounter>
-                  )}
-                </NavLink>
-              ))}
-            </div>
+            <SectionTitle>Main</SectionTitle>
+            {navItems.main.map((item) => (
+              <NavLink 
+                key={item.href} 
+                href={item.href} 
+                $isActive={isActive(item.href)}
+                onClick={closeMobileMenu}
+              >
+                <FontAwesomeIcon icon={item.icon} />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
 
-            {/* Browse Movies */}
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ 
-                fontSize: '12px', 
-                fontWeight: 'bold', 
-                color: '#718096', 
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Browse Movies
-              </div>
-              {allNavItems.filter(item => item.category === 'browse').map((item) => (
-                <NavLink 
-                  key={item.href} 
-                  href={item.href} 
-                  $isActive={isActive(item.href)}
-                  onClick={closeMobileMenu}
-                >
-                  <FontAwesomeIcon icon={item.icon} />
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <FavoritesCounter>{item.badge}</FavoritesCounter>
-                  )}
-                </NavLink>
-              ))}
-            </div>
+            {/* Browse Content */}
+            <SectionTitle>Browse</SectionTitle>
+            {navItems.browse.map((item) => (
+              <NavLink 
+                key={item.href} 
+                href={item.href} 
+                $isActive={isActive(item.href)}
+                onClick={closeMobileMenu}
+              >
+                <FontAwesomeIcon icon={item.icon} />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
 
             {/* User Section */}
-            <div>
-              <div style={{ 
-                fontSize: '12px', 
-                fontWeight: 'bold', 
-                color: '#718096', 
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                My Movies
-              </div>
-              {allNavItems.filter(item => item.category === 'user').map((item) => (
-                <NavLink 
-                  key={item.href} 
-                  href={item.href} 
-                  $isActive={isActive(item.href)}
-                  onClick={closeMobileMenu}
-                >
-                  <FontAwesomeIcon icon={item.icon} />
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <FavoritesCounter>{item.badge}</FavoritesCounter>
-                  )}
-                </NavLink>
-              ))}
-            </div>
+            <SectionTitle>My Collection</SectionTitle>
+            {navItems.user.map((item) => (
+              <NavLink 
+                key={item.href} 
+                href={item.href} 
+                $isActive={isActive(item.href)}
+                onClick={closeMobileMenu}
+              >
+                <FontAwesomeIcon icon={item.icon} />
+                <span>{item.label}</span>
+                {item.badge && (
+                  <FavoritesCounter>{item.badge}</FavoritesCounter>
+                )}
+              </NavLink>
+            ))}
           </MobileNavLinks>
 
           {/* Mobile Auth Section */}
@@ -444,12 +426,12 @@ const Header: React.FC = () => {
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '12px',
-                    padding: '12px 16px',
+                    padding: '16px',
                     backgroundColor: 'rgba(66, 153, 225, 0.05)',
                     borderRadius: '8px',
                     border: '1px solid rgba(66, 153, 225, 0.1)'
                   }}>
-                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name} />
+                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name || 'User'} />
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: '500', color: '#fff' }}>
                         {user.name}
@@ -459,13 +441,13 @@ const Header: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center' }}>
+                  <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center', minHeight: '48px' }}>
                     <FontAwesomeIcon icon={faSignOutAlt} />
                     <span>Sign Out</span>
                   </AuthButton>
                 </>
               ) : (
-                <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center' }}>
+                <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center', minHeight: '48px' }}>
                   <FontAwesomeIcon icon={faSignInAlt} />
                   <span>Sign In</span>
                 </AuthButton>

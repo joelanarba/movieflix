@@ -2,16 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faHeart as faHeartSolid, faCalendar } from '@fortawesome/free-solid-svg-icons';
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+import { faStar, faCalendar, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { Movie } from '../../types/movie';
 import { getImageUrl } from '../../utils/api';
 import { useFavorites } from '../../contexts/FavoritesContext';
 
-const Card = styled.div`
+const CardContainer = styled(Link)`
+  display: block;
   background-color: #1a1d29;
   border-radius: 12px;
   overflow: hidden;
@@ -19,11 +18,40 @@ const Card = styled.div`
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid #2d3748;
+  text-decoration: none;
+  color: inherit;
 
   &:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-6px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
     border-color: #4299e1;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 8px;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    &:hover {
+      transform: none;
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
   }
 `;
 
@@ -31,6 +59,7 @@ const PosterContainer = styled.div`
   position: relative;
   aspect-ratio: 2/3;
   overflow: hidden;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
 `;
 
 const PosterImage = styled.img`
@@ -39,8 +68,21 @@ const PosterImage = styled.img`
   object-fit: cover;
   transition: transform 0.4s ease;
 
-  ${Card}:hover & {
+  ${CardContainer}:hover & {
     transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    ${CardContainer}:hover & {
+      transform: scale(1.02);
+    }
+  }
+
+  /* Disable transform on touch devices for better performance */
+  @media (hover: none) and (pointer: coarse) {
+    ${CardContainer}:hover & {
+      transform: none;
+    }
   }
 `;
 
@@ -55,6 +97,17 @@ const PosterPlaceholder = styled.div`
   font-size: 14px;
   text-align: center;
   padding: 20px;
+  line-height: 1.4;
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 16px;
+  }
+
+  @media (max-width: 350px) {
+    font-size: 11px;
+    padding: 12px;
+  }
 `;
 
 const FavoriteButton = styled.button`
@@ -64,23 +117,116 @@ const FavoriteButton = styled.button`
   background: rgba(0, 0, 0, 0.7);
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+  z-index: 2;
+  
+  /* Minimum touch target size for accessibility */
+  min-width: 44px;
+  min-height: 44px;
 
   &:hover {
     background: rgba(0, 0, 0, 0.9);
     transform: scale(1.1);
   }
+
+  &:focus {
+    outline: 2px solid #4299e1;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    top: 8px;
+    right: 8px;
+  }
+
+  @media (max-width: 350px) {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    top: 6px;
+    right: 6px;
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    &:hover {
+      transform: none;
+    }
+    
+    &:active {
+      transform: scale(0.95);
+      background: rgba(0, 0, 0, 0.9);
+    }
+  }
+`;
+
+const FavoriteIcon = styled(FontAwesomeIcon)<{ $isFavorite: boolean }>`
+  color: ${props => props.$isFavorite ? '#e53e3e' : '#ffffff'};
+  transition: color 0.3s ease;
+  font-size: 16px;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 350px) {
+    font-size: 12px;
+  }
+`;
+
+const RatingBadge = styled.div`
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  line-height: 1;
+
+  @media (max-width: 480px) {
+    padding: 5px 8px;
+    font-size: 11px;
+    top: 8px;
+    left: 8px;
+  }
+
+  @media (max-width: 350px) {
+    padding: 4px 6px;
+    font-size: 10px;
+    top: 6px;
+    left: 6px;
+  }
 `;
 
 const CardContent = styled.div`
   padding: 16px;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+
+  @media (max-width: 350px) {
+    padding: 10px;
+  }
 `;
 
 const MovieTitle = styled.h3`
@@ -93,121 +239,179 @@ const MovieTitle = styled.h3`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 42px;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+    min-height: 38px;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 350px) {
+    font-size: 13px;
+    min-height: 34px;
+    margin-bottom: 6px;
+  }
 `;
 
 const MovieInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-const InfoRow = styled.div`
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
   color: #cbd5e0;
   font-size: 14px;
+  gap: 8px;
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  @media (max-width: 350px) {
+    font-size: 11px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
-const Rating = styled.div`
+const ReleaseDate = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 350px) {
+    gap: 3px;
+  }
 `;
 
-const RatingValue = styled.span<{ $rating: number }>`
+const VoteAverage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 600;
-  color: ${(props) => {
-    if (props.$rating >= 7.5) return '#48bb78';
-    if (props.$rating >= 6.0) return '#ed8936';
-    return '#e53e3e';
-  }};
-`;
+  color: #ffd700;
+  flex-shrink: 0;
 
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  color: inherit;
-  display: block;
+  @media (max-width: 350px) {
+    gap: 3px;
+  }
 `;
-
-// Helper function to determine the source page based on pathname
-const getSourceFromPathname = (pathname: string): string => {
-  if (pathname === '/') return 'trending';
-  if (pathname === '/popular') return 'popular';
-  if (pathname === '/top-rated') return 'top-rated';
-  if (pathname === '/upcoming') return 'upcoming';
-  if (pathname === '/favorites') return 'favorites';
-  return 'home';
-};
 
 interface MovieCardProps {
   movie: Movie;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
-  const pathname = usePathname();
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
-  const isMovieFavorite = isFavorite(movie.id);
+  const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const formatReleaseDate = (dateString: string): string => {
+    if (!dateString) return 'TBA';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    return isNaN(year) ? 'TBA' : year.toString();
+  };
 
-    if (isMovieFavorite) {
+  const isFavorite = (movieId: number): boolean => {
+    return favorites.some(fav => fav.id === movieId);
+  };
+
+  const handleFavoriteClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (isFavorite(movie.id)) {
       removeFromFavorites(movie.id);
     } else {
-      addToFavorites(movie);
+      addToFavorites({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average,
+        addedAt: new Date().toISOString()
+      });
     }
   };
 
-  const formatReleaseDate = (dateString: string): string => {
-    if (!dateString) return 'Unknown';
-    const date = new Date(dateString);
-    return date.getFullYear().toString();
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    img.style.display = 'none';
+    
+    // Create placeholder element
+    const placeholder = document.createElement('div');
+    placeholder.style.cssText = `
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #718096;
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.4;
+    `;
+    placeholder.textContent = 'No poster available';
+    
+    const parent = img.parentElement;
+    if (parent) {
+      parent.appendChild(placeholder);
+    }
   };
 
-  // Generate the movie detail URL with source page information
-  const movieDetailUrl = `/movies/${movie.id}?from=${getSourceFromPathname(pathname)}`;
-
   return (
-    <Card>
-      <StyledLink href={movieDetailUrl}>
-        <PosterContainer>
-          {movie.poster_path ? (
-            <PosterImage
-              src={getImageUrl(movie.poster_path, 'w500')}
-              alt={movie.title}
-              loading="lazy"
-            />
-          ) : (
-            <PosterPlaceholder>
-              No poster available
-            </PosterPlaceholder>
-          )}
-          <FavoriteButton onClick={handleFavoriteClick}>
-            <FontAwesomeIcon
-              icon={isMovieFavorite ? faHeartSolid : faHeartRegular}
-              color={isMovieFavorite ? '#e53e3e' : '#ffffff'}
-            />
-          </FavoriteButton>
-        </PosterContainer>
-        <CardContent>
-          <MovieTitle>{movie.title}</MovieTitle>
-          <MovieInfo>
-            <InfoRow>
-              <FontAwesomeIcon icon={faCalendar} size="sm" />
-              <span>{formatReleaseDate(movie.release_date)}</span>
-            </InfoRow>
-            <Rating>
-              <FontAwesomeIcon icon={faStar} color="#ffd700" size="sm" />
-              <RatingValue $rating={movie.vote_average}>
-                {movie.vote_average.toFixed(1)}
-              </RatingValue>
-            </Rating>
-          </MovieInfo>
-        </CardContent>
-      </StyledLink>
-    </Card>
+    <CardContainer href={`/movies/${movie.id}?from=movies`}>
+      <PosterContainer>
+        {movie.poster_path ? (
+          <PosterImage
+            src={getImageUrl(movie.poster_path, 'w500')}
+            alt={`${movie.title} poster`}
+            loading="lazy"
+            onError={handleImageError}
+          />
+        ) : (
+          <PosterPlaceholder>
+            No poster available
+          </PosterPlaceholder>
+        )}
+        
+        <FavoriteButton 
+          onClick={handleFavoriteClick}
+          title={isFavorite(movie.id) ? 'Remove from favorites' : 'Add to favorites'}
+          aria-label={isFavorite(movie.id) ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <FavoriteIcon 
+            icon={faHeart} 
+            $isFavorite={isFavorite(movie.id)}
+          />
+        </FavoriteButton>
+
+        {movie.vote_average > 0 && (
+          <RatingBadge>
+            <FontAwesomeIcon icon={faStar} />
+            {movie.vote_average.toFixed(1)}
+          </RatingBadge>
+        )}
+      </PosterContainer>
+      
+      <CardContent>
+        <MovieTitle>{movie.title}</MovieTitle>
+        <MovieInfo>
+          <ReleaseDate>
+            <FontAwesomeIcon icon={faCalendar} />
+            <span>{formatReleaseDate(movie.release_date)}</span>
+          </ReleaseDate>
+          <VoteAverage>
+            <FontAwesomeIcon icon={faStar} />
+            {movie.vote_average.toFixed(1)}
+          </VoteAverage>
+        </MovieInfo>
+      </CardContent>
+    </CardContainer>
   );
 };
 
