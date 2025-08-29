@@ -1,20 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faFilm, 
-  faHeart, 
   faHome, 
-  faSignInAlt, 
-  faSignOutAlt, 
-  faBars, 
-  faTimes,
+  faFire, 
+  faStar, 
+  faClock, 
+  faSearch, 
+  faSignOutAlt,
+  faHeart,
   faTv,
-  faSearch
+  faUser,
+  faChevronDown,
+  faFilm,
+  faBars,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -30,7 +34,7 @@ const HeaderContainer = styled.header`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 `;
 
-const Nav = styled.nav`
+const HeaderContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
@@ -159,6 +163,7 @@ const AuthSection = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
 `;
 
 const AuthButton = styled.button`
@@ -182,6 +187,11 @@ const AuthButton = styled.button`
     color: white;
   }
 
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   @media (max-width: 480px) {
     padding: 8px 10px;
     font-size: 13px;
@@ -196,12 +206,24 @@ const UserInfo = styled.div`
   color: #cbd5e0;
 `;
 
-const UserAvatar = styled.img`
+const UserAvatar = styled.div<{ $photoURL?: string | null }>`
   width: 32px;
   height: 32px;
   border-radius: 50%;
   border: 2px solid #4299e1;
   object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #2c5282;
+
+  ${props => props.$photoURL && `
+    background-image: url(${props.$photoURL});
+    background-size: cover;
+    background-position: center;
+  `}
 
   @media (max-width: 480px) {
     width: 28px;
@@ -247,7 +269,7 @@ const MobileAuthSection = styled.div`
 `;
 
 const SectionTitle = styled.div`
-  fontSize: 12px;
+  font-size: 12px;
   font-weight: bold;
   color: #718096;
   margin: 16px 0 8px 0;
@@ -260,6 +282,55 @@ const SectionTitle = styled.div`
   }
 `;
 
+const UserProfile = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+  }
+`;
+
+const ProfileDropdown = styled.div<{ $isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #2d3748;
+  border: 1px solid #4299e1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+  z-index: 10;
+  opacity: ${props => props.$isOpen ? '1' : '0'};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  transition: all 0.3s ease;
+  transform: translateY(${props => props.$isOpen ? '0' : '-10px'});
+  display: flex;
+  flex-direction: column;
+`;
+
+const DropdownItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #cbd5e0;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+
+  &:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+    color: #4299e1;
+  }
+`;
+
 // Define interface for navigation items
 interface NavItem {
   href: string;
@@ -269,35 +340,62 @@ interface NavItem {
 }
 
 const Header: React.FC = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { favorites } = useFavorites();
   const { user, logout, loading } = useAuth();
+  const { favorites } = useFavorites();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Mock admin check function
-  const isAdmin = (user: any) => {
-    // In a real app, you would check user claims or roles from your auth provider
-    // For now, we'll use a simple check or assume any logged-in user can be admin for testing
-    return user && user.email === 'admin@example.com'; // Example: only allow a specific email
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
   };
+
+  const handleSignIn = () => {
+    router.push('/login');
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  if (loading) {
+    return (
+      <HeaderContainer>
+        <HeaderContent>
+          <div>Loading...</div>
+        </HeaderContent>
+      </HeaderContainer>
+    );
+  }
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
     return pathname.startsWith(path);
-  };
-
-  const handleAuthAction = async () => {
-    if (user) {
-      try {
-        await logout();
-      } catch (error) {
-        console.error('Error signing out:', error);
-      }
-    } else {
-      router.push('/login');
-    }
-    setIsMobileMenuOpen(false);
   };
 
   const toggleMobileMenu = () => {
@@ -335,14 +433,9 @@ const Header: React.FC = () => {
     ...navItems.user
   ];
 
-  // Add Admin link if user is an admin
-  if (user && isAdmin(user)) {
-    desktopNavItems.push({ href: '/admin/dashboard', label: 'Admin', icon: faTv });
-  }
-
   return (
     <HeaderContainer>
-      <Nav>
+      <HeaderContent>
         <Logo href="/" onClick={closeMobileMenu}>
           <FontAwesomeIcon icon={faFilm} size="lg" />
           <span>MovieFlix</span>
@@ -360,27 +453,43 @@ const Header: React.FC = () => {
             </NavLink>
           ))}
 
-          {!loading && (
-            <AuthSection>
-              {user ? (
-                <>
-                  <UserInfo>
-                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name || 'User'} />
-                    <UserName>{user.name}</UserName>
-                  </UserInfo>
-                  <AuthButton onClick={handleAuthAction}>
+          <AuthSection>
+            {user ? (
+              <UserInfo>
+                <UserProfile
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
+                >
+                  <UserAvatar $photoURL={user.photoURL}>
+                    {!user.photoURL && getInitials(user.name || user.email)}
+                  </UserAvatar>
+                  <UserName>{user.name || user.email}</UserName>
+                  <FontAwesomeIcon 
+                    icon={faChevronDown} 
+                    className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </UserProfile>
+
+                <ProfileDropdown $isOpen={isDropdownOpen}>
+                  <DropdownItem onClick={() => router.push('/favorites')}>
+                    <FontAwesomeIcon icon={faHeart} />
+                    <span>Favorites ({favorites.length})</span>
+                  </DropdownItem>
+                  <DropdownItem onClick={handleSignOut}>
                     <FontAwesomeIcon icon={faSignOutAlt} />
-                    <span>Logout</span>
-                  </AuthButton>
-                </>
-              ) : (
-                <AuthButton onClick={handleAuthAction}>
-                  <FontAwesomeIcon icon={faSignInAlt} />
-                  <span>Sign In</span>
-                </AuthButton>
-              )}
-            </AuthSection>
-          )}
+                    <span>Sign Out</span>
+                  </DropdownItem>
+                </ProfileDropdown>
+              </UserInfo>
+            ) : (
+              <AuthButton onClick={handleSignIn}>
+                <FontAwesomeIcon icon={faUser} />
+                <span className="hidden sm:inline">Sign In</span>
+              </AuthButton>
+            )}
+          </AuthSection>
         </DesktopNavLinks>
 
         {/* Mobile Menu Button */}
@@ -435,18 +544,6 @@ const Header: React.FC = () => {
                 )}
               </NavLink>
             ))}
-
-            {/* Admin Section for Mobile */}
-            {user && isAdmin(user) && (
-              <NavLink 
-                href="/admin/dashboard" 
-                $isActive={isActive('/admin/dashboard')}
-                onClick={closeMobileMenu}
-              >
-                <FontAwesomeIcon icon={faTv} />
-                <span>Admin</span>
-              </NavLink>
-            )}
           </MobileNavLinks>
 
           {/* Mobile Auth Section */}
@@ -463,31 +560,33 @@ const Header: React.FC = () => {
                     borderRadius: '8px',
                     border: '1px solid rgba(66, 153, 225, 0.1)'
                   }}>
-                    <UserAvatar src={user.photoURL || '/default-avatar.png'} alt={user.name || 'User'} />
+                    <UserAvatar $photoURL={user.photoURL}>
+                       {!user.photoURL && getInitials(user.name || user.email)}
+                    </UserAvatar>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: '500', color: '#fff' }}>
-                        {user.name}
+                        {user.name || user.email}
                       </div>
                       <div style={{ fontSize: '12px', color: '#718096' }}>
                         {user.email}
                       </div>
                     </div>
                   </div>
-                  <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center', minHeight: '48px' }}>
+                  <AuthButton onClick={handleSignOut} style={{ justifyContent: 'center', minHeight: '48px' }}>
                     <FontAwesomeIcon icon={faSignOutAlt} />
                     <span>Sign Out</span>
                   </AuthButton>
                 </>
               ) : (
-                <AuthButton onClick={handleAuthAction} style={{ justifyContent: 'center', minHeight: '48px' }}>
-                  <FontAwesomeIcon icon={faSignInAlt} />
+                <AuthButton onClick={handleSignIn} style={{ justifyContent: 'center', minHeight: '48px' }}>
+                  <FontAwesomeIcon icon={faUser} />
                   <span>Sign In</span>
                 </AuthButton>
               )}
             </MobileAuthSection>
           )}
         </MobileMenu>
-      </Nav>
+      </HeaderContent>
     </HeaderContainer>
   );
 };
