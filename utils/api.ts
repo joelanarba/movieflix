@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Movie, MovieDetails, TMDbResponse, Genre, MovieReview } from '../types/movie';
+import { Movie, MovieDetails, TMDbResponse, Genre, MovieReview, Video } from '../types/movie';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -221,5 +221,22 @@ export const discoverMoviesByGenre = async (
       throw new Error('Invalid API key. Please check your TMDb API key configuration.');
     }
     throw new Error('Failed to discover movies by genre');
+  }
+};
+
+export const fetchMovieVideos = async (movieId: string): Promise<Video[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<{ results: Video[] }>(`/movie/${movieId}/videos`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching movie videos:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch movie videos');
   }
 };

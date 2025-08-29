@@ -1,4 +1,3 @@
-
 export interface TVShow {
   id: number;
   name: string;
@@ -176,4 +175,15 @@ export interface TMDbResponse<T> {
   results: T[];
   total_pages: number;
   total_results: number;
+}
+
+export interface Video {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  published_at: string;
+  size: number;
 }

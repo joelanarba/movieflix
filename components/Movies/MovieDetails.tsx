@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,11 +12,12 @@ import {
   faTag,
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
-import { MovieDetails as MovieDetailsType } from '../../types/movie';
-import { getImageUrl } from '../../utils/api';
+import { MovieDetails as MovieDetailsType, Video } from '../../types/movie';
+import { getImageUrl, fetchMovieVideos } from '../../utils/api';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import RecommendedMovies from './RecommendedMovies';
 import MovieReviews from './MovieReviews';
+import TrailerList from '../ui/TrailerList';
 
 const DetailsContainer = styled.div`
   max-width: 1200px;
@@ -280,6 +281,20 @@ interface MovieDetailsProps {
 const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   const isMovieFavorite = isFavorite(movie.id);
+  const [trailers, setTrailers] = useState<Video[]>([]);
+
+  useEffect(() => {
+    const loadTrailers = async () => {
+      try {
+        const videos = await fetchMovieVideos(movie.id.toString());
+        setTrailers(videos);
+      } catch (error) {
+        console.error('Error loading movie trailers:', error);
+      }
+    };
+
+    loadTrailers();
+  }, [movie.id]);
 
   const handleFavoriteClick = () => {
     if (isMovieFavorite) {
@@ -394,6 +409,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie }) => {
           </CastGrid>
         </CastSection>
       )}
+
+      <TrailerList videos={trailers} title="Trailers & Teasers" />
 
       <MovieReviews movieId={movie.id} />
 

@@ -212,7 +212,7 @@ const UserAvatar = styled.img`
 const UserName = styled.span`
   font-weight: 500;
   font-size: 14px;
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -275,6 +275,13 @@ const Header: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Mock admin check function
+  const isAdmin = (user: any) => {
+    // In a real app, you would check user claims or roles from your auth provider
+    // For now, we'll use a simple check or assume any logged-in user can be admin for testing
+    return user && user.email === 'admin@example.com'; // Example: only allow a specific email
+  };
+
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
     return pathname.startsWith(path);
@@ -328,6 +335,11 @@ const Header: React.FC = () => {
     ...navItems.user
   ];
 
+  // Add Admin link if user is an admin
+  if (user && isAdmin(user)) {
+    desktopNavItems.push({ href: '/admin/dashboard', label: 'Admin', icon: faTv });
+  }
+
   return (
     <HeaderContainer>
       <Nav>
@@ -347,7 +359,7 @@ const Header: React.FC = () => {
               )}
             </NavLink>
           ))}
-          
+
           {!loading && (
             <AuthSection>
               {user ? (
@@ -423,6 +435,18 @@ const Header: React.FC = () => {
                 )}
               </NavLink>
             ))}
+
+            {/* Admin Section for Mobile */}
+            {user && isAdmin(user) && (
+              <NavLink 
+                href="/admin/dashboard" 
+                $isActive={isActive('/admin/dashboard')}
+                onClick={closeMobileMenu}
+              >
+                <FontAwesomeIcon icon={faTv} />
+                <span>Admin</span>
+              </NavLink>
+            )}
           </MobileNavLinks>
 
           {/* Mobile Auth Section */}

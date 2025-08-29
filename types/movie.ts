@@ -80,6 +80,17 @@ export interface TMDbResponse<T> {
   total_results: number;
 }
 
+export interface Video {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  published_at: string;
+  size: number;
+}
+
 export interface FavoriteMovie {
   id: number;
   title: string;

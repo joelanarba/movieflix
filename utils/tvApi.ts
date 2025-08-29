@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TVShow, TVShowDetails, TMDbResponse, Person } from '../types/tv';
+import { TVShow, TVShowDetails, TMDbResponse, Person, Video } from '../types/tv';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -167,5 +167,22 @@ export const searchTVShows = async (query: string, page: number = 1): Promise<TM
       throw new Error('Invalid API key. Please check your TMDb API key configuration.');
     }
     throw new Error('Failed to search TV shows');
+  }
+};
+
+export const fetchTVVideos = async (tvId: string): Promise<Video[]> => {
+  try {
+    if (!process.env.NEXT_PUBLIC_TMDB_API_KEY) {
+      throw new Error('TMDb API key is not configured. Please add NEXT_PUBLIC_TMDB_API_KEY to your .env.local file.');
+    }
+    
+    const response = await api.get<{ results: Video[] }>(`/tv/${tvId}/videos`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching TV videos:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw new Error('Invalid API key. Please check your TMDb API key configuration.');
+    }
+    throw new Error('Failed to fetch TV videos');
   }
 };

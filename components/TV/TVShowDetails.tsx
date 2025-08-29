@@ -1,13 +1,13 @@
-
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faCalendar, faTv, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { TVShowDetails as TVShowDetailsType } from '../../types/tv';
-import { getImageUrl } from '../../utils/tvApi';
+import { TVShowDetails as TVShowDetailsType, Video } from '../../types/tv';
+import { getImageUrl, fetchTVVideos } from '../../utils/tvApi';
+import TrailerList from '../ui/TrailerList';
 
 const DetailsContainer = styled.div`
   max-width: 1200px;
@@ -310,6 +310,21 @@ interface TVShowDetailsProps {
 }
 
 const TVShowDetails: React.FC<TVShowDetailsProps> = ({ tvShow }) => {
+  const [trailers, setTrailers] = useState<Video[]>([]);
+
+  useEffect(() => {
+    const loadTrailers = async () => {
+      try {
+        const videos = await fetchTVVideos(tvShow.id.toString());
+        setTrailers(videos);
+      } catch (error) {
+        console.error('Error loading TV show trailers:', error);
+      }
+    };
+
+    loadTrailers();
+  }, [tvShow.id]);
+
   const formatDate = (dateString: string): string => {
     if (!dateString) return 'TBA';
     const date = new Date(dateString);
@@ -437,6 +452,8 @@ const TVShowDetails: React.FC<TVShowDetailsProps> = ({ tvShow }) => {
           </CreatedBySection>
         </ContentSection>
       )}
+
+      <TrailerList videos={trailers} title="Trailers & Teasers" />
 
       {tvShow.credits && tvShow.credits.cast.length > 0 && (
         <ContentSection>
