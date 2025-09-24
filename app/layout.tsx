@@ -7,6 +7,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import Layout from "../components/Layout/Layout";
 import StyledComponentsRegistry from "../lib/styled-components-registry";
 import { Analytics } from "@vercel/analytics/next";
+import { PWAInstallToast } from "@/components/ui/PWAInstallToast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
           <AuthProvider>
             <FavoritesProvider>
               <Layout>{children}</Layout>
+              <PWAInstallToast />
             </FavoritesProvider>
           </AuthProvider>
         </StyledComponentsRegistry>
