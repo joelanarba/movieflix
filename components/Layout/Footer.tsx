@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
+import MobileFooterSection from "./MobileFooterSection";
 
 const FooterContainer = styled.footer`
   background-color: #1a202c;
@@ -9,6 +10,10 @@ const FooterContainer = styled.footer`
   padding: 40px 20px 20px;
   margin-top: auto;
   border-top: 1px solid #2d3748;
+
+  @media (max-width: 768px) {
+    padding: 20px 16px;
+  }
 `;
 
 const FooterContent = styled.div`
@@ -20,9 +25,17 @@ const FooterContent = styled.div`
   margin-bottom: 20px;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 20px;
+    display: none;
+  }
+`;
+
+const MobileFooterContent = styled.div`
+  display: none;
+  max-width: 600px;
+  margin: 0 auto 20px;
+
+  @media (max-width: 768px) {
+    display: block;
   }
 `;
 
@@ -34,7 +47,8 @@ const FooterSection = styled.div`
     margin-bottom: 16px;
   }
 
-  p, a {
+  p,
+  a {
     color: #cbd5e0;
     font-size: 14px;
     line-height: 1.6;
@@ -54,6 +68,10 @@ const FooterLinks = styled.ul`
 
   li {
     margin-bottom: 8px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 12px;
+    }
   }
 `;
 
@@ -67,6 +85,7 @@ const FooterBottom = styled.div`
   @media (max-width: 768px) {
     padding-top: 15px;
     font-size: 12px;
+    border-top: none;
   }
 `;
 
@@ -78,7 +97,7 @@ const TMDbCredit = styled.p`
   a {
     color: #4299e1;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -88,51 +107,143 @@ const TMDbCredit = styled.p`
 const Footer: React.FC = () => {
   return (
     <FooterContainer>
+      {/* Desktop Footer */}
       <FooterContent>
         <FooterSection>
           <h3>MovieFlix</h3>
           <p>
-            Discover amazing movies, explore detailed information, and save your favorites. 
-            Your ultimate destination for movie discovery and entertainment.
+            Discover amazing movies, explore detailed information, and save your
+            favorites. Your ultimate destination for movie discovery and
+            entertainment.
           </p>
         </FooterSection>
-        
+
         <FooterSection>
           <h3>Features</h3>
           <FooterLinks>
-            <li><a href="/">Trending Movies</a></li>
-            <li><a href="/favorites">My Favorites</a></li>
-            <li><a href="/">Movie Search</a></li>
-            <li><a href="/">Detailed Reviews</a></li>
+            <li>
+              <a href="/">Trending Movies</a>
+            </li>
+            <li>
+              <a href="/favorites">My Favorites</a>
+            </li>
+            <li>
+              <a href="/">Movie Search</a>
+            </li>
+            <li>
+              <a href="/">Detailed Reviews</a>
+            </li>
           </FooterLinks>
         </FooterSection>
-        
+
         <FooterSection>
           <h3>About</h3>
           <FooterLinks>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Contact</a></li>
+            <li>
+              <a href="#">About Us</a>
+            </li>
+            <li>
+              <a href="#">Privacy Policy</a>
+            </li>
+            <li>
+              <a href="#">Terms of Service</a>
+            </li>
+            <li>
+              <a href="#">Contact</a>
+            </li>
           </FooterLinks>
         </FooterSection>
-        
+
         <FooterSection>
           <h3>Connect</h3>
           <FooterLinks>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">Facebook</a></li>
-            <li><a href="#">Instagram</a></li>
-            <li><a href="#">YouTube</a></li>
+            <li>
+              <a href="#">Twitter</a>
+            </li>
+            <li>
+              <a href="#">Facebook</a>
+            </li>
+            <li>
+              <a href="#">Instagram</a>
+            </li>
+            <li>
+              <a href="#">YouTube</a>
+            </li>
           </FooterLinks>
         </FooterSection>
       </FooterContent>
-      
+
+      {/* Mobile Footer */}
+      <MobileFooterContent>
+        <MobileFooterSection title="MovieFlix" defaultOpen={true}>
+          <p>
+            Discover amazing movies, explore detailed information, and save your
+            favorites. Your ultimate destination for movie discovery and
+            entertainment.
+          </p>
+        </MobileFooterSection>
+
+        <MobileFooterSection title="Features">
+          <FooterLinks>
+            <li>
+              <a href="/">Trending Movies</a>
+            </li>
+            <li>
+              <a href="/favorites">My Favorites</a>
+            </li>
+            <li>
+              <a href="/">Movie Search</a>
+            </li>
+            <li>
+              <a href="/">Detailed Reviews</a>
+            </li>
+          </FooterLinks>
+        </MobileFooterSection>
+
+        <MobileFooterSection title="About">
+          <FooterLinks>
+            <li>
+              <a href="#">About Us</a>
+            </li>
+            <li>
+              <a href="#">Privacy Policy</a>
+            </li>
+            <li>
+              <a href="#">Terms of Service</a>
+            </li>
+            <li>
+              <a href="#">Contact</a>
+            </li>
+          </FooterLinks>
+        </MobileFooterSection>
+
+        <MobileFooterSection title="Connect">
+          <FooterLinks>
+            <li>
+              <a href="#">Twitter</a>
+            </li>
+            <li>
+              <a href="#">Facebook</a>
+            </li>
+            <li>
+              <a href="#">Instagram</a>
+            </li>
+            <li>
+              <a href="#">YouTube</a>
+            </li>
+          </FooterLinks>
+        </MobileFooterSection>
+      </MobileFooterContent>
+
       <FooterBottom>
         <p>&copy; {new Date().getFullYear()} MovieFlix. All rights reserved.</p>
         <TMDbCredit>
-          This product uses the TMDb API but is not endorsed or certified by{' '}
-          <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
+          This product uses the TMDb API but is not endorsed or certified by{" "}
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             TMDb
           </a>
         </TMDbCredit>
