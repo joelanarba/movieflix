@@ -1,62 +1,69 @@
+"use client";
 
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'; 
-import { faFilm as faFilmSolid, faUser, faEnvelope, faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import {
+  faFilm as faFilmSolid,
+  faUser,
+  faEnvelope,
+  faLock,
+  faEye,
+  faEyeSlash,
+} from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AuthPage: React.FC = () => {
-  const { user, signInWithGoogle, signUpWithEmail, signInWithEmail, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const { user, signInWithGoogle, signUpWithEmail, signInWithEmail, loading } =
+    useAuth();
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   // Form states
   const [signInData, setSignInData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const [signUpData, setSignUpData] = useState({
-    name: '',
-    email: '',
-    password: ''
+    name: "",
+    email: "",
+    password: "",
   });
 
   // Redirect to home if already logged in
   useEffect(() => {
     if (user && !loading) {
-      router.push('/');
+      router.push("/");
     }
   }, [user, loading, router]);
 
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signInData.email || !signInData.password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError('');
+      setError("");
       await signInWithEmail(signInData.email, signInData.password);
-      router.push('/');
+      router.push("/");
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      if (error.code === 'auth/user-not-found') {
-        setError('No account found with this email');
-      } else if (error.code === 'auth/wrong-password') {
-        setError('Incorrect password');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Invalid email address');
+      console.error("Sign in error:", error);
+      if (error.code === "auth/user-not-found") {
+        setError("No account found with this email");
+      } else if (error.code === "auth/wrong-password") {
+        setError("Incorrect password");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Invalid email address");
       } else {
-        setError('Failed to sign in. Please try again.');
+        setError("Failed to sign in. Please try again.");
       }
       setIsSubmitting(false);
     }
@@ -65,30 +72,34 @@ const AuthPage: React.FC = () => {
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signUpData.name || !signUpData.email || !signUpData.password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     if (signUpData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError('');
-      await signUpWithEmail(signUpData.name, signUpData.email, signUpData.password);
-      router.push('/');
+      setError("");
+      await signUpWithEmail(
+        signUpData.name,
+        signUpData.email,
+        signUpData.password
+      );
+      router.push("/");
     } catch (error: any) {
-      console.error('Sign up error:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Invalid email address');
-      } else if (error.code === 'auth/weak-password') {
-        setError('Password is too weak');
+      console.error("Sign up error:", error);
+      if (error.code === "auth/email-already-in-use") {
+        setError("An account with this email already exists");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Invalid email address");
+      } else if (error.code === "auth/weak-password") {
+        setError("Password is too weak");
       } else {
-        setError('Failed to create account. Please try again.');
+        setError("Failed to create account. Please try again.");
       }
       setIsSubmitting(false);
     }
@@ -97,12 +108,12 @@ const AuthPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       setIsSubmitting(true);
-      setError('');
+      setError("");
       await signInWithGoogle();
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      console.error('Google sign in error:', error);
-      setError('Failed to sign in with Google. Please try again.');
+      console.error("Google sign in error:", error);
+      setError("Failed to sign in with Google. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -126,8 +137,8 @@ const AuthPage: React.FC = () => {
         <div className="text-center">
           <div className="flex justify-center mb-6">
             <div className="bg-blue-500 p-4 rounded-full">
-              <FontAwesomeIcon 
-                icon={faFilmSolid} 
+              <FontAwesomeIcon
+                icon={faFilmSolid}
                 className="text-white text-3xl"
               />
             </div>
@@ -136,7 +147,9 @@ const AuthPage: React.FC = () => {
             Welcome to MovieFlix
           </h1>
           <p className="text-slate-300 text-lg">
-            {activeTab === 'signin' ? 'Sign in to your account' : 'Create your account'}
+            {activeTab === "signin"
+              ? "Sign in to your account"
+              : "Create your account"}
           </p>
         </div>
 
@@ -146,26 +159,26 @@ const AuthPage: React.FC = () => {
           <div className="flex">
             <button
               onClick={() => {
-                setActiveTab('signin');
-                setError('');
+                setActiveTab("signin");
+                setError("");
               }}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors duration-200 ${
-                activeTab === 'signin'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:text-white'
+                activeTab === "signin"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-700 text-slate-300 hover:text-white"
               }`}
             >
               Sign In
             </button>
             <button
               onClick={() => {
-                setActiveTab('signup');
-                setError('');
+                setActiveTab("signup");
+                setError("");
               }}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors duration-200 ${
-                activeTab === 'signup'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:text-white'
+                activeTab === "signup"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-700 text-slate-300 hover:text-white"
               }`}
             >
               Sign Up
@@ -180,7 +193,7 @@ const AuthPage: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'signin' ? (
+            {activeTab === "signin" ? (
               /* Sign In Form */
               <form onSubmit={handleSignInSubmit} className="space-y-6">
                 <div>
@@ -188,15 +201,17 @@ const AuthPage: React.FC = () => {
                     Email
                   </label>
                   <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faEnvelope} 
-                      className="absolute left-3 top-3.5 text-slate-400 text-sm"
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
                     />
                     <input
                       type="email"
                       value={signInData.email}
-                      onChange={(e) => setSignInData({...signInData, email: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        setSignInData({ ...signInData, email: e.target.value })
+                      }
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your email"
                       required
                     />
@@ -208,24 +223,32 @@ const AuthPage: React.FC = () => {
                     Password
                   </label>
                   <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faLock} 
-                      className="absolute left-3 top-3.5 text-slate-400 text-sm"
+                    <FontAwesomeIcon
+                      icon={faLock}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
                     />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={signInData.password}
-                      onChange={(e) => setSignInData({...signInData, password: e.target.value})}
-                      className="w-full pl-10 pr-12 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        setSignInData({
+                          ...signInData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-12 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your password"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-300"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
                     >
-                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                      <FontAwesomeIcon
+                        icon={showPassword ? faEyeSlash : faEye}
+                        className="w-4 h-4"
+                      />
                     </button>
                   </div>
                 </div>
@@ -235,7 +258,7 @@ const AuthPage: React.FC = () => {
                   disabled={isSubmitting}
                   className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
                 >
-                  {isSubmitting ? 'Signing In...' : 'Sign In'}
+                  {isSubmitting ? "Signing In..." : "Sign In"}
                 </button>
               </form>
             ) : (
@@ -246,15 +269,17 @@ const AuthPage: React.FC = () => {
                     Full Name
                   </label>
                   <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faUser} 
-                      className="absolute left-3 top-3.5 text-slate-400 text-sm"
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
                     />
                     <input
                       type="text"
                       value={signUpData.name}
-                      onChange={(e) => setSignUpData({...signUpData, name: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, name: e.target.value })
+                      }
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your full name"
                       required
                     />
@@ -266,15 +291,17 @@ const AuthPage: React.FC = () => {
                     Email
                   </label>
                   <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faEnvelope} 
-                      className="absolute left-3 top-3.5 text-slate-400 text-sm"
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
                     />
                     <input
                       type="email"
                       value={signUpData.email}
-                      onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        setSignUpData({ ...signUpData, email: e.target.value })
+                      }
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your email"
                       required
                     />
@@ -286,24 +313,32 @@ const AuthPage: React.FC = () => {
                     Password
                   </label>
                   <div className="relative">
-                    <FontAwesomeIcon 
-                      icon={faLock} 
-                      className="absolute left-3 top-3.5 text-slate-400 text-sm"
+                    <FontAwesomeIcon
+                      icon={faLock}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
                     />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={signUpData.password}
-                      onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
-                      className="w-full pl-10 pr-12 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signUpData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-12 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Create a password (min. 6 characters)"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-300"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
                     >
-                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                      <FontAwesomeIcon
+                        icon={showPassword ? faEyeSlash : faEye}
+                        className="w-4 h-4"
+                      />
                     </button>
                   </div>
                 </div>
@@ -313,7 +348,7 @@ const AuthPage: React.FC = () => {
                   disabled={isSubmitting}
                   className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
                 >
-                  {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+                  {isSubmitting ? "Creating Account..." : "Sign Up"}
                 </button>
               </form>
             )}
@@ -348,7 +383,9 @@ const AuthPage: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center text-slate-400 text-sm">
-          <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
+          <p>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
         </div>
       </div>
     </div>
